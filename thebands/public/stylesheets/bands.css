@@ -1,0 +1,27 @@
+body {
+  font-family: 'BLKCHCRY';
+  font-size: 30px;
+}
+
+.back, .addband, .searchForm {
+  text-align: center;
+}
+
+#searchButton {
+  color: rgb(34, 138, 205);
+}
+
+.bandlist {
+  margin-left: 5px;
+  margin-right: 5px;
+  text-align: center;
+}
+
+img {
+  margin-top: 5px;
+  border: 4px solid white;
+}
+
+.imgLink:hover {
+  border: 4px solid lightsteelblue;
+}

@@ -1,0 +1,12 @@
+body {
+	font-family: 'BLKCHCRY';
+	font-size: 30px;
+}
+
+h1, .back, p {
+	text-align: center;
+}
+
+p, .back {
+  font-size: 30px;
+}

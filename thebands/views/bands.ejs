@@ -1,0 +1,42 @@
+<!doctype html>
+
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+
+    <title>
+        List of Bands
+    </title>
+    <meta name="description" content="List of Bands">
+
+    <link rel="stylesheet" href="stylesheets/bands.css">
+    <link rel="stylesheet" href="stylesheets/font/font.css">
+</head>
+
+<body>
+    <div class="searchForm">
+      <form action="/bands" method="GET">
+        Name of the band:<br>
+        <input type="text" name="bandName" value='<%= search_value %>'><br>
+        <input type="submit" id="searchButton" value='Search' /><br>
+        <br>
+      </form>
+    </div>
+    <div class="bandlist">
+      <% for (let i = 0; i < arr.length; i++) {  %>
+        <a title="<%= arr[i].title %>" href="<%= arr[i].href %>"><img class="imgLink" alt='<%= arr[i].alt %>' src="<%= arr[i].img_path %>"></a>
+      <%}%>
+    </div>
+
+    <div class="addband">
+        <a href="/addband">Add new band</a>
+    </div>
+
+    <div class="back">
+        <a href="/">Back</a>
+    </div>
+    <!-- <script src="js/scripts.js"></script> -->
+</body>
+
+</html>

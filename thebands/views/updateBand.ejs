@@ -1,0 +1,39 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+
+  <title>Update the band</title>
+
+  <link rel="stylesheet" href="/stylesheets/addUpdateBand.css">
+  <link rel="stylesheet" href="/stylesheets/font/font.css">
+</head>
+
+<body>
+  <p class ="mainDesc">~Update the band~</p>
+  <div class="putMembers">
+    <form action="/bands/<%= band_url %>?q=isUpdated" method="POST">
+      Name of the band:<br>
+      <input type="text" name="bandName" value='<%= thyBand.name %>'><br>
+      Formed on:<br>
+      <input type="text" name="bandFormed" value="<%= thyBand.formed %>"><br>
+      Amount of members:<br>
+      <input type="number" min="1" name="bandMembers" value="<%= thyBand.members %>"><br>
+      Genre:<br>
+      <input type="text" name="bandGenre" value="<%= thyBand.genre %>"><br>
+      Amount of albums:<br>
+      <input type="number" min="0" name="bandAlbums" value="<%= thyBand.albums %>"><br>
+      <br>
+      <input type="submit" id="updateButton" value='Update info' /><br>
+      <br>
+    </form>
+  </div>
+
+  <div class="back">
+    <a href="/bands">Back to the list of bands</a>
+  </div>
+  <!-- <script src="js/scripts.js"></script> -->
+</body>
+
+</html>

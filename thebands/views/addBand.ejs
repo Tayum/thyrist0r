@@ -1,0 +1,46 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+
+  <title>New band</title>
+
+  <link rel="stylesheet" href="stylesheets/addUpdateBand.css">
+  <link rel="stylesheet" href="stylesheets/font/font.css">
+  <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+</head>
+
+<body>
+  <h1 class="mainHeader">Be a part of The Bands community.</h1>
+  <p class ="mainDesc">~Add new band~</p>
+  <div class="postMembers">
+    <form action="/bands" enctype="multipart/form-data" method="POST">
+      Name of the band:<br>
+      <input type="text" name="bandName" value='Cool Name'><br>
+      Formed on:<br>
+      <input type="text" name="bandFormed" value="1999-02-25"><br>
+      Amount of members:<br>
+      <input type="number" min="1" name="bandMembers" value="3"><br>
+      Genre:<br>
+      <input type="text" name="bandGenre" value="Melodic metal"><br>
+      Amount of albums:<br>
+      <input type="number" min="0" name="bandAlbums" value="8"><br>
+      <br>
+      Band logo:<br>
+      <input type="file" name="bandLogo" accept="image/*"><br>
+      <br>
+      Band members:<br>
+      <input type="file" name="bandMembers" accept="image/*"><br>
+      <br>
+      <input type="submit" id="addButton" value='Add' /><br>
+      <br>
+    </form>
+  </div>
+
+  <div class="back">
+    <a href="/bands">Back</a>
+  </div>
+
+</body>
+</html>

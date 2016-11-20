@@ -1,0 +1,39 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+
+  <title><%= page_title %></title>
+
+  <link rel="stylesheet" href="/stylesheets/singleBand.css">
+  <link rel="stylesheet" href="/stylesheets/font/font.css">
+</head>
+
+<body>
+  <img class="imgMembers" alt='<%= img_alt %>' src="<%= img_path %>">
+  <span class="name"><%= name %></span>
+  <%= desc %><br>
+  <br>
+
+  <div class="updateMembers">
+    <form action="/bands/<%= band_url %>?q=update" method="POST">
+      <input type="submit" id="updateButton" value='Update the info' /><br>
+      <br>
+    </form>
+  </div>
+
+  <div class="deleteMembers">
+    <form action="/bands/<%= band_url %>?q=delete" method="POST">
+      <input type="submit" id="deleteButton" value='Delete this band' /><br>
+      <br>
+    </form>
+  </div>
+
+  <div class="back">
+    <a href="/bands">Back to the list of bands</a>
+  </div>
+  <!-- <script src="js/scripts.js"></script> -->
+</body>
+
+</html>
