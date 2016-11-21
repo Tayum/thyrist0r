@@ -82,14 +82,9 @@ router.route('/')
 		req.checkBody('bandAlbums', 'Albums field must be integer number').isInt();
 		let errs = req.validationErrors();
 		if (errs) {
-			let arr = [];
-			for (let i = 0; i < errs.length; i++) {
-				arr.push(errs[i].msg);
-			}
-			for(let i = 0; i < arr.length; i++) {
-				req.flash('error_msg', ' ' + arr[i]);
-			}
-			res.redirect('/addband');
+			res.render('addBand', {
+				errors: errs
+			});
 		}
 		else {
 			let newBand = new bandModel({
@@ -184,14 +179,11 @@ var updateTheBand = function(req, res, next) {
 			req.checkBody('bandAlbums', 'Albums field must be integer number').isInt();
 			let errs = req.validationErrors();
 			if (errs) {
-				let arr = [];
-				for (let i = 0; i < errs.length; i++) {
-					arr.push(errs[i].msg);
-				}
-				for(let i = 0; i < arr.length; i++) {
-					req.flash('error_msg', ' ' + arr[i]);
-				}
-				res.redirect('/bands/' + bandPathId + '?q=toUpdate');
+				res.render('updateBand', {
+					errors: errs,
+					band_url: bandPathId,
+					thyBand: band
+				});
 			}
 			else {
 				let isUpdated = false;
@@ -254,6 +246,7 @@ router.route('/:band_id_param')
 				// if the band is about to be UPDATED, render the page with the UPDATE fields
 				if (req.query.q === "toUpdate") {
 					res.render('updateBand', {
+						errors: null,
 						band_url: bandPathId,
 						thyBand: band
 					});

@@ -12,6 +12,11 @@
 
 <body>
   <p class ="mainDesc">~Update the band~</p>
+  <% if (errors) { %>
+      <% for (let i = 0; i < errors.length; i++) { %>
+        <div class="alert alert-danger"><%= errors[i].msg %></div>
+      <% } %>
+  <% } %>
   <div class="putMembers">
     <form action="/bands/<%= band_url %>?q=isUpdated" method="POST">
       Name of the band:<br>

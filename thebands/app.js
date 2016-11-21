@@ -7,7 +7,7 @@ var bodyParser = require('body-parser');
 // reading text/blob data properly from HTML forms
 var busboyBodyParser = require('busboy-body-parser');
 
-// Things we use for creating auth (6th lab):
+// Things we use for creating auth:
 var expressValidator = require('express-validator');
 var flash = require('connect-flash');
 var session = require('express-session');
@@ -20,7 +20,7 @@ var expressLayouts = require('express-ejs-layouts');
 // CONNECT TO DATABASE
 const mongo = require('mongodb');
 const mongoose = require('mongoose');
-const url = 'mongodb://localhost:27017/lab2';
+const url = 'mongodb://localhost:27017/thebands';
 mongoose.connect(url);
 
 var routes = require('./routes/index');

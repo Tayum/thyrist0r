@@ -26,7 +26,9 @@ router.route('/register')
     if (req.user) {
       res.redirect('back');
     }
-    res.render('register');
+    res.render('register', {
+      errors: null
+    });
   })
   /* Registration. */
   .post(function(req, res, next) {
@@ -37,17 +39,11 @@ router.route('/register')
     req.checkBody('username', 'Username is required').notEmpty();
     req.checkBody('password', 'Password is required').notEmpty();
     req.checkBody('repassword', 'Passwords do not match').equals(req.body.password);
-
     let errs = req.validationErrors();
     if (errs) {
-      let arr = [];
-      for (let i = 0; i < errs.length; i++) {
-        arr.push(errs[i].msg);
-      }
-      for(let i = 0; i < arr.length; i++) {
-        req.flash('error_msg', ' ' + arr[i]);
-      }
-      res.redirect('/users/register');
+      res.render('register', {
+        errors: errs
+      });
     }
     else {
       userModel.getUserByUsername(req.body.username.trim(), function (err, user) {

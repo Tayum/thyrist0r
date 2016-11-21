@@ -4,44 +4,46 @@
 <head>
   <meta charset="utf-8">
 
+  <link rel="stylesheet" href="/stylesheets/bootstrap.css">
   <link rel="stylesheet" href="/stylesheets/style.css">
-  <link rel="stylesheet" href="/stylesheets/font/font.css">
 </head>
 
 <body>
-      <div class="container">
-        <div class="header">
-          <ul class="ulClass">
-            <li class="liClass"><a href="/">Home</a></li>
+  <div class="container">
+      <div class="header clearfix">
+        <nav>
+          <ul class="nav nav-pills pull-right">
+            <li role="presentation"><a href="/">Home</a></li>
             <% if (!user) { %>
-              <li class="liClass"><a href="/users/login">Login</a></li>
-              <li class="liClass"><a href="/users/register">Register</a></li>
+              <li role="presentation"><a href="/users/login">Login</a></li>
+              <li role="presentation"><a href="/users/register">Register</a></li>
             <% } %>
             <% if (user) { %>
-              <li class="liClass"><a href="/users/profile/<%= user.username %>"><%= user.username %></a></li>
-              <li class="liClass"><a href="/users/logout">Logout</a></li>
+              <li role="presentation"><a href="/users/profile/<%= user.username %>"><%= user.username %></a></li>
+              <li role="presentation"><a href="/users/logout">Logout</a></li>
             <% } %>
-            <li class="liClass"><a href="/about">About</a></li>
+            <li role="presentation"><a href="/about">About</a></li>
           </ul>
-        </div>
+        </nav>
+        <h3 class="text-muted">The Bands</h3>
       </div>
 
+      <div class="row">
+        <div class="col-lg-12">
+
       <% if (success_msg.length > 0) {%>
-        <div class="alert-success-msg"><%= success_msg %></div>
+        <div class="alert alert-success"><%= success_msg %></div>
       <% } %>
       <% if (error_msg.length > 0) {%>
-        <div class="alert-error-msg"><%= error_msg %></div>
+        <div class="alert alert-danger"><%= error_msg %></div>
       <% } %>
       <% if (error.length > 0) {%>
-        <div class="alert-error"><%= error %></div>
+        <div class="alert alert-danger"><%= error %></div>
       <% } %>
 
       <%- body %>
 
-      <div class="container">
-        <footer class="footer">
-          <p>&copy; 2016 The Bands, Inc.</p>
-        </footer>
-      </div> <!-- /container -->
+        </div>
+      </div>
 </body>
 </html>

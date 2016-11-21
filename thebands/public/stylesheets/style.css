@@ -1,58 +1,8 @@
-/* alert flash messages */
-.alert-success-msg, .alert-error-msg, .alert-error {
-  text-align: center;
-}
-
-.alert-success-msg {
-  color: rgb(110, 189, 61);
-}
-
-.alert-error-msg {
-  color: rgb(196, 29, 29);
-}
-
-.alert-error {
-  color: rgb(223, 187, 32);
-}
-
 /* Space out content a bit */
 body {
+  padding-top: 20px;
   padding-bottom: 20px;
 }
-
-
-
-/* navigation bar [STARTS HERE] */
-.ulClass {
-    list-style-type: none;
-    margin: 0;
-    padding: 0;
-    overflow: hidden;
-    background-color: #f3f3f3;
-}
-
-.liClass {
-    float: left;
-}
-
-.liClass a {
-    display: block;
-    color: #666;
-    text-align: center;
-    padding: 14px 16px;
-    text-decoration: none;
-}
-
-.liClass a:hover:not(.active) {
-    background-color: #ddd;
-}
-
-.liClass a:hover {
-    background-color: #4CAF50;
-}
-/* navigation bar [ENDS HERE] */
-
-
 
 /* Everything but the jumbotron gets side spacing for mobile first views */
 .header,
@@ -65,7 +15,7 @@ body {
 /* Custom page header */
 .header {
   padding-bottom: 20px;
-  border-bottom: 1px solid #e5e5e5;
+  border-bottom: 2px solid #e5e5e5;
 }
 /* Make the masthead heading the same height as the navigation */
 .header h3 {
@@ -78,13 +28,13 @@ body {
 .footer {
   padding-top: 19px;
   color: #777;
-  border-top: 1px solid #e5e5e5;
+  border-top: 2px solid #e5e5e5;
 }
 
 /* Customize container */
-@media (min-width: 768px) {
+@media (min-width: 1920px) { // 768
   .container {
-    max-width: 730px;
+    max-width: 1920px; // 730
   }
 }
 .container-narrow > hr {
@@ -128,10 +78,10 @@ body {
   }
 }
 
-.page-header {
-  margin-top: 0;
+.page-header{
+  margin-top:0;
 }
 
-footer {
-  margin-top: 40px;
+footer{
+  margin-top:40px;
 }
