@@ -13,60 +13,112 @@ var ensureAuth = require('../public/javascripts/ensureAuth');
 var ensureAuthFunc = new ensureAuth();
 
 router.route('/')
-	/* GET bands listing. */
-	.get(ensureAuthFunc.ensureAuth, function(req, res, next) {
+	/* GET bands listing (pagination included). */
+	.get(/*ensureAuthFunc.ensureAuth, */function(req, res, next) {
 		if (req.originalUrl === '/bands/') {
 			res.redirect('/bands');
 		}
 		else {
-			let query = null;
-			let search_field_value = "";
-			if(req.query.bandName === undefined ||
-		     req.query.bandName === null)
-			{
-				query = bandModel.find().lean();
-			}
-			else {
-				search_field_value = req.query.bandName;
-				query = bandModel.find({
-					// search (case insensitive) partial match
-					name: { "$regex": req.query.bandName, "$options": "i" }
-				}).lean();
-			}
-			let arr = [];
-			query.exec(function(err, bands) {
+			let query = bandModel.count();
+			query.exec(function(err, amount) {
 				if (err) {
 					err = new Error('Sorry, the file with contents were not found on server.');
 					err.status = 500;
 					next(err);
 				}
+				// None bands are in database
+				else if (amount <= 0) {
+					res.render('bands', {
+						curPage: 1,
+						arr: [],
+						search_value: ""
+					});
+				}
 				else {
-					let bandList = bands;
-					for (let i = 0; i < bandList.length; i++) {
-						let thyBand = bandList[i];
-						arr.push({
-							title: thyBand.name,
-							href: 'bands/' + thyBand._id,
-							alt: thyBand.name + '_logo',
-							img_path: 'images/' + thyBand._id + '/logo.jpg'
-						});
+					let search_value = req.query.bandName;
+					// If search field is empty - assign search_value to ""
+					if(search_value === null ||
+						 search_value === undefined)
+					{
+						search_value = "";
 					}
-					if (arr.length === 0) {
-						// if no bands were found - render a special page with "Nothing Found!" notification
-						res.render('infoAndBack', {
-							title: 'Band Search',
-							operation_title: "Nothing found!",
-							operation_description: "No bands were found by \"" + search_field_value + "\" name.",
-							back_button_href: "/bands",
-							back_button_desc: "Return to the list of bands"
-						});
-					}
-					else {
-						res.render('bands', {
-							arr: arr,
-							search_value: search_field_value
-						});
-					}
+					// Receive amount of bands that meet criteria
+					query = bandModel.count({
+						// search (case insensitive) partial match
+						name: { "$regex": search_value, "$options": "i" }
+					});
+					query.exec(function(err, amount) {
+						if(err) {
+							err = new Error('Sorry, the file with contents were not found on server.');
+							err.status = 500;
+							next(err);
+						}
+						else {
+							// if amount equals 0, notify the user about it
+							if (amount === 0) {
+								req.flash('error_msg', 'Nothing were found :(');
+								res.redirect('/bands');
+							}
+							else {
+								let pageNumber = req.query.page;
+								req.checkQuery('page', 'Page is required').notEmpty();
+								if (!search_value) {
+									req.checkQuery('page', 'Page should lay in proper bounds (from 1 to ' + parseInt((amount-1)/4 + 1) + ' at the moment).').isInt({ min: 1, max: parseInt((amount-1)/4 + 1) });
+								}
+								else {
+									req.checkQuery('page', 'Page should lay in proper bounds (from 1 to ' + parseInt((amount-1)/4 + 1) + ' for this query).').isInt({ min: 1, max: parseInt((amount-1)/4 + 1) });
+								}
+								let errs = req.validationErrors();
+								// If page is set improperly
+								if (errs.length === 1) {
+									req.flash('error_msg', errs[0].msg);
+									// If the search field was empty: redirect to /bands
+									if (!search_value) {
+										res.redirect('/bands');
+									}
+									// If the search field was not empty: redirect to /bands with search field that was set previously
+									else {
+										res.redirect('/bands?bandName=' + search_value);
+									}
+								}
+								// If page is not set at all: set is on default (1)
+								else {
+									if (errs.length === 2) {
+										pageNumber = 1;
+									}
+									query = bandModel.find({
+										// search (case insensitive) partial match
+										name: { "$regex": search_value, "$options": "i" }
+									}).limit(4).skip(4 * (pageNumber - 1)).lean();
+									query.exec(function(err, bands) {
+										if (err) {
+											err = new Error('Sorry, the file with contents were not found on server.');
+											err.status = 500;
+											next(err);
+										}
+										else {
+											let arr = [];
+											let bandList = bands;
+											for (let i = 0; i < bandList.length; i++) {
+												let thyBand = bandList[i];
+												arr.push({
+													title: thyBand.name,
+													href: 'bands/' + thyBand._id,
+													alt: thyBand.name + '_logo',
+													img_path: 'images/' + thyBand._id + '/logo.jpg'
+												});
+											}
+											res.render('bands', {
+												curPage: pageNumber,
+												arr: arr,
+												search_value: search_value
+											});
+										}
+									});
+								}
+							}
+						}
+					});
 				}
 			});
 		}

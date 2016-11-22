@@ -28,7 +28,7 @@ var bands = require('./routes/bands');
 var api = require('./routes/api');
 var users = require('./routes/users');
 
-//process.env.NODE_ENV = 'production'; // production
+// process.env.NODE_ENV = 'production'; // production
 
 var app = express();
 

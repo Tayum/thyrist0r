@@ -12,20 +12,26 @@
   <div class="container">
       <div class="header clearfix">
         <nav>
+          <ul class="nav nav-pills pull-left">
+            <li><a href="/">Home</a></li>
+            <% if (user) { %>
+              <li><a href="/bands">Bands</a></li>
+              <li><a href="/albums">Albums</a></li>
+            <% } %>
+          </ul>
           <ul class="nav nav-pills pull-right">
-            <li role="presentation"><a href="/">Home</a></li>
             <% if (!user) { %>
-              <li role="presentation"><a href="/users/login">Login</a></li>
-              <li role="presentation"><a href="/users/register">Register</a></li>
+              <li><a href="/users/login">Login</a></li>
+              <li><a href="/users/register">Register</a></li>
             <% } %>
             <% if (user) { %>
-              <li role="presentation"><a href="/users/profile/<%= user.username %>"><%= user.username %></a></li>
-              <li role="presentation"><a href="/users/logout">Logout</a></li>
+              <li><a href="/users/profile/<%= user.username %>"><%= user.username %></a></li>
+              <li><a href="/users/logout">Logout</a></li>
             <% } %>
-            <li role="presentation"><a href="/about">About</a></li>
+            <li><a href="/about">About</a></li>
           </ul>
         </nav>
-        <h3 class="text-muted">The Bands</h3>
+        <h3 class="text-muted text-center">The Bands</h3>
       </div>
 
       <div class="row">

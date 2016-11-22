@@ -26,7 +26,7 @@ router.route('/bands')
           res.end();
         }
         else {
-          req.checkQuery('page', 'Page should lay in proper bounds (from 1 to ' + parseInt(amount/4 + 1) + ' at the moment).').isInt({ min: 1, max: parseInt(amount/4 + 1) });
+          req.checkQuery('page', 'Page should lay in proper bounds (from 1 to ' + parseInt((amount-1)/4 + 1) + ' at the moment).').isInt({ min: 1, max: parseInt((amount-1)/4 + 1) });
           let errs = req.validationErrors();
           if (errs) {
             let arr = [];
