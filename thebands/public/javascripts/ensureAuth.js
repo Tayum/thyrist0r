@@ -10,6 +10,15 @@ function ensureAuthModule() {
       res.redirect('/users/login');
     }
   };
+  this.ensureAdminAuth = function(req, res, next) {
+    if (req.isAuthenticated() && req.user.access_level === 10) {
+      return next();
+    }
+    else {
+      req.flash('error_msg', 'You need to have admin rights to access that page!');
+      res.redirect('/');
+    }
+  };
 }
 
 module.exports = ensureAuthModule;

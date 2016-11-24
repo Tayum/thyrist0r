@@ -33,11 +33,7 @@ router.route('/register')
   /* Registration. */
   .post(function(req, res, next) {
     // Validate all the fields
-    req.checkBody('name', 'Name is required').notEmpty();
-    req.checkBody('email', 'Email is required').notEmpty();
     req.checkBody('email', 'Email is not valid').isEmail();
-    req.checkBody('username', 'Username is required').notEmpty();
-    req.checkBody('password', 'Password is required').notEmpty();
     req.checkBody('repassword', 'Passwords do not match').equals(req.body.password);
     let errs = req.validationErrors();
     if (errs) {
@@ -153,7 +149,7 @@ router.route('/logout')
     // if the user was not authorised - nothing will happen
     if (req.user) {
       req.logout();
-      req.flash('success_msg', 'You are logged out');
+      req.flash('success_msg', 'You were successfully logged out.');
     }
     res.redirect('/users/login');
   });
@@ -179,27 +175,54 @@ router.route('/profile/:user_username_param')
                 parseInt(req.user.access_level) === 10 &&
                 req.user.username.toLowerCase() === userPathUsername.toLowerCase())
         {
-          // Admin requests his page (with all users)
-          userModel.getAllUsers(function(err, users) {
+          // Admin requests his page (with all users (pagination included))
+          userModel.getAmount(function(err, amount) {
             if (err) {
-              err = new Error('Sorry, cannot GET all the users.');
+              err = new Error('Sorry, cannot receive thamount of users.');
               err.status = 500;
               next(err);
             }
             else {
-              let arr = [];
-              for (let i = 0; i < users.length; i++) {
-                arr.push({
-                  access_level: users[i].access_level,
-                  name: users[i].name,
-                  email: users[i].email,
-                  username: users[i].username,
-                  href: '/users/profile/' + users[i].username
+              let pageNumber = req.query.page;
+              req.checkQuery('page', 'Page is required').notEmpty();
+              req.checkQuery('page', 'Page should lay in proper bounds (from 1 to ' + parseInt((amount-1)/20 + 1) + ')').isInt({ min: 1, max: parseInt((amount-1)/20 + 1) });
+              let errs = req.validationErrors();
+              // If page is set improperly
+              if (errs.length === 1) {
+                req.flash('error_msg', errs[0].msg);
+                res.redirect('/users/profile/' + req.params.user_username_param);
+              }
+              // If page is not set at all: set is on default (1)
+              else {
+                if (errs.length === 2) {
+                  pageNumber = 1;
+                }
+                userModel.getAllUsers(pageNumber, function(err, users) {
+                  if (err) {
+                    err = new Error('Sorry, cannot GET all the users.');
+                    err.status = 500;
+                    next(err);
+                  }
+                  else {
+                    let arr = [];
+                    for (let i = 0; i < users.length; i++) {
+                      arr.push({
+                        access_level: users[i].access_level,
+                        name: users[i].name,
+                        email: users[i].email,
+                        username: users[i].username,
+                        img_path: 'images/users/' + users[i]._id + '/avatar.jpg',
+                        href: '/users/profile/' + users[i].username
+                      });
+                    }
+                    res.render('userPage', {
+                      curPage: pageNumber,
+                      maxPage: parseInt((amount-1)/20 + 1),
+                      arr: arr
+                    });
+                  }
                 });
               }
-              res.render('userPage', {
-                arr: arr
-              });
             }
           });
         }

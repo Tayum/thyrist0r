@@ -14,7 +14,7 @@ var ensureAuthFunc = new ensureAuth();
 
 router.route('/')
 	/* GET bands listing (pagination included). */
-	.get(/*ensureAuthFunc.ensureAuth, */function(req, res, next) {
+	.get(ensureAuthFunc.ensureAuth, function(req, res, next) {
 		if (req.originalUrl === '/bands/') {
 			res.redirect('/bands');
 		}
@@ -30,6 +30,7 @@ router.route('/')
 				else if (amount <= 0) {
 					res.render('bands', {
 						curPage: 1,
+						maxPage: 1,
 						arr: [],
 						search_value: ""
 					});
@@ -105,11 +106,12 @@ router.route('/')
 													title: thyBand.name,
 													href: 'bands/' + thyBand._id,
 													alt: thyBand.name + '_logo',
-													img_path: 'images/' + thyBand._id + '/logo.jpg'
+													img_path: 'images/bands/' + thyBand._id + '/logo.jpg'
 												});
 											}
 											res.render('bands', {
 												curPage: pageNumber,
+												maxPage: parseInt((amount-1)/4 + 1),
 												arr: arr,
 												search_value: search_value
 											});
@@ -124,13 +126,8 @@ router.route('/')
 		}
 	})
 	/* POST new band. */
-	.post(ensureAuthFunc.ensureAuth, function(req, res, next) {
-		req.checkBody('bandName', 'Name field is required').notEmpty();
-		req.checkBody('bandFormed', 'Formed field is required').notEmpty();
-		req.checkBody('bandMembers', 'Members field is required').notEmpty();
+	.post(ensureAuthFunc.ensureAdminAuth, function(req, res, next) {
 		req.checkBody('bandMembers', 'Members field must be integer number').isInt();
-		req.checkBody('bandGenre', 'Genre field is required').notEmpty();
-		req.checkBody('bandAlbums', 'Albums field is required').notEmpty();
 		req.checkBody('bandAlbums', 'Albums field must be integer number').isInt();
 		let errs = req.validationErrors();
 		if (errs) {
@@ -156,7 +153,7 @@ router.route('/')
 				else {
 					// Create a directory (with a unique name - '_id') for the certain object
 					// and place the passed images there
-					let dir = 'public/images/' + band._id;
+					let dir = 'public/images/bands/' + band._id;
 			    fs.mkdir(dir, function() {
 						fs.writeFile(dir + '/logo.jpg', req.files.bandLogo.data);
 						fs.writeFile(dir + '/members.jpg', req.files.bandMembers.data);
@@ -186,7 +183,7 @@ var deleteTheBand = function(req, res, next) {
 			next(err);
 		}
 		else {
-			let dir = 'public/images/' + band._id;
+			let dir = 'public/images/bands/' + band._id;
 			band.remove();
 			// Remove the directory (with a unique name - '_id') for the certain object
 			// (also removing all the files inside it)
@@ -222,12 +219,7 @@ var updateTheBand = function(req, res, next) {
 			next(err);
 		}
 		else {
-			req.checkBody('bandName', 'Name field is required').notEmpty();
-			req.checkBody('bandFormed', 'Formed field is required').notEmpty();
-			req.checkBody('bandMembers', 'Members field is required').notEmpty();
 			req.checkBody('bandMembers', 'Members field must be integer number').isInt();
-			req.checkBody('bandGenre', 'Genre field is required').notEmpty();
-			req.checkBody('bandAlbums', 'Albums field is required').notEmpty();
 			req.checkBody('bandAlbums', 'Albums field must be integer number').isInt();
 			let errs = req.validationErrors();
 			if (errs) {
@@ -308,7 +300,7 @@ router.route('/:band_id_param')
 		      res.render('singleBand', {
 		        page_title: band.name,
 		        img_alt: band.name + '_members',
-		        img_path: '/images/' + band._id + '/members.jpg',
+		        img_path: '/images/bands/' + band._id + '/members.jpg',
 		        name: band.name,
 						band_url: bandPathId,
 		        desc: 'is ' + band.genre + ' genre band, formed on ' + band.formed + '. Consists of ' + band.members + ' members at the moment. The band has published ' + band.albums + ' albums so far.'
@@ -320,7 +312,7 @@ router.route('/:band_id_param')
 	/* POST method: checking
 	WHETHER [UPDATE or DELETE button was pressed]
 	OR [the info about some band was UPDATED] */
-	.post(ensureAuthFunc.ensureAuth, function(req, res, next) {
+	.post(ensureAuthFunc.ensureAdminAuth, function(req, res, next) {
 		let thyQuery = req.query.q;
 		// DELETE button was pressed
 		if (thyQuery === "delete") {

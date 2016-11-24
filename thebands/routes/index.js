@@ -22,7 +22,7 @@ router.route('/about')
 
 router.route('/addband')
   /* GET the page with the POST form of creating the new band. */
-  .get(ensureAuthFunc.ensureAuth, function(req, res, next) {
+  .get(ensureAuthFunc.ensureAdminAuth, function(req, res, next) {
     res.render('addBand', {
       errors: null
     });

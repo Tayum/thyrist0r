@@ -36,9 +36,16 @@ module.exports.getUserByUsername = function(username, cb) {
 	query.exec(cb);
 };
 
+// Get amount of all users
+module.exports.getAmount = function(cb) {
+	let query = userModel.count();
+	query.exec(cb);
+};
+
+
 // Get all users (just for viewing on admin's profile page)
-module.exports.getAllUsers = function(cb) {
-	let query = userModel.find().lean();
+module.exports.getAllUsers = function(pageNumber, cb) {
+	let query = userModel.find().limit(20).skip(20 * (pageNumber - 1)).lean();
 	query.exec(cb);
 };
 
