@@ -25,6 +25,7 @@ mongoose.connect(url);
 
 var routes = require('./routes/index');
 var bands = require('./routes/bands');
+var albums = require('./routes/albums');
 var api = require('./routes/api');
 var users = require('./routes/users');
 
@@ -91,6 +92,7 @@ app.use(function(req, res, next) {
 
 app.use('/', routes);
 app.use('/bands', bands);
+app.use('/albums', albums);
 app.use('/api', api);
 app.use('/users', users);
 

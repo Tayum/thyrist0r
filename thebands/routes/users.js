@@ -1,5 +1,7 @@
 var express = require('express');
 var router = express.Router();
+var path = require('path');
+var fs = require('fs');
 var passport = require('passport');
 var LocalStrategy = require('passport-local').Strategy;
 
@@ -178,7 +180,7 @@ router.route('/profile/:user_username_param')
           // Admin requests his page (with all users (pagination included))
           userModel.getAmount(function(err, amount) {
             if (err) {
-              err = new Error('Sorry, cannot receive thamount of users.');
+              err = new Error('Sorry, cannot receive the amount of users.');
               err.status = 500;
               next(err);
             }
@@ -211,7 +213,7 @@ router.route('/profile/:user_username_param')
                         name: users[i].name,
                         email: users[i].email,
                         username: users[i].username,
-                        img_path: 'images/users/' + users[i]._id + '/avatar.jpg',
+                        img_path: '/images/users/' + users[i]._id + '/avatar.jpg',
                         href: '/users/profile/' + users[i].username
                       });
                     }
@@ -234,11 +236,40 @@ router.route('/profile/:user_username_param')
             name: user.name,
             email: user.email,
             username: user.username,
+            img_path: '/images/users/' + user._id + '/avatar.jpg',
             href: '/users/profile/' + user.username
           });
           res.render('userPage', {
             arr: arr
           });
+        }
+      }
+    });
+  })
+  /* POST an avatar to profile page. */
+  .post(ensureAuthFunc.ensureAuth, function(req, res, next) {
+    let userPathUsername = req.params.user_username_param;
+    userModel.getUserByUsername(userPathUsername, function(err, user) {
+      if (err) {
+        err = new Error('Sorry, cannot GET the user by such a username.');
+        err.status = 500;
+        next(err);
+      }
+      else {
+        // User with such a name does not exist.
+        if (!user) {
+          req.flash('error_msg', 'The user with such a name was not found.');
+          res.redirect('back');
+        }
+        else {
+          // Create a directory (with a unique name - '_id') for the certain user
+          // and place the avatar there
+          let dir = 'public/images/users/' + user._id;
+          fs.mkdir(dir, function() {
+            fs.writeFile(dir + '/avatar.jpg', req.files.avatar.data);
+          });
+          req.flash('success_msg', 'The avatar has been successfully uploaded!');
+          res.redirect('/users/profile/' + req.params.user_username_param);
         }
       }
     });

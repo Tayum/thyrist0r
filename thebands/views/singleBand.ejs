@@ -4,35 +4,47 @@
 <head>
   <meta charset="utf-8">
 
-  <title><%= page_title %></title>
-
-  <link rel="stylesheet" href="/stylesheets/singleBand.css">
-  <link rel="stylesheet" href="/stylesheets/font/font.css">
+  <title><%= band.name %></title>
+  <link rel="stylesheet" href="/stylesheets/centered-columns.css">
+  <link rel="stylesheet" href="/stylesheets/rightside-thumbnail.css">
 </head>
 
 <body>
-  <img class="imgMembers" alt='<%= img_alt %>' src="<%= img_path %>">
-  <span class="name"><%= name %></span>
-  <%= desc %><br>
-  <br>
+  <div class="container-fluid">
+    <div class="thumbnail right-caption">
+      <img src="<%= img_path %>" width="500" height="400" alt="<%= band.name %>_members">
+      <div class="caption">
+        <h3><%= band.name %></h3>
+        <p><b>Date of formation</b>: <%= band.formed.split('-', 1) %> year</p>
+        <p><b>Amount of members</b>: <%= band.members %></p>
+        <p><b>Main genre</b>: <%= band.genre %></p>
+        <p><b>Amount of albums</b>: <%= band.albums %></p>
+        <p><b>Description</b>: <%= band.description %></p>
+      </div>
+    </div>
+  </div>
 
-  <div class="updateMembers">
-    <form action="/bands/<%= band_url %>?q=update" method="POST">
-      <input type="submit" id="updateButton" value='Update the info' /><br>
+  <% if (user.access_level === 10) { %>
+    <div class="col-sm-3 col-md-12">
+      <div class="row row-centered">
+        <form action="/bands/<%= band_url %>?q=update" method="POST">
+          <input type="submit" class="btn btn-info" value='Update the info' />
+        </form>
+      </div>
       <br>
-    </form>
-  </div>
-
-  <div class="deleteMembers">
-    <form action="/bands/<%= band_url %>?q=delete" method="POST">
-      <input type="submit" id="deleteButton" value='Delete this band' /><br>
+      <div class="row row-centered">
+        <form action="/bands/<%= band_url %>?q=delete" method="POST">
+          <input type="submit" class="btn btn-danger" value='Delete this band' />
+        </form>
+      </div>
       <br>
-    </form>
+    </div>
+  <% } %>
+
+  <div class="text-center">
+    <a href="<%= back_url %>">Back to the previous page</a>
   </div>
 
-  <div class="back">
-    <a href="/bands">Back to the list of bands</a>
-  </div>
   <!-- <script src="js/scripts.js"></script> -->
 </body>
 

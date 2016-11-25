@@ -28,4 +28,12 @@ router.route('/addband')
     });
   });
 
+router.route('/addalbum')
+  /* GET the page with the POST form of creating the new album. */
+  .get(ensureAuthFunc.ensureAdminAuth, function(req, res, next) {
+    res.render('addAlbum', {
+      errors: null
+    });
+  });
+
 module.exports = router;

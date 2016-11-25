@@ -35,11 +35,15 @@
       <label>Albums</label>
       <input type="number" min="0" class="form-control" placeholder="Amount of albums. Current value: <%= thyBand.albums %>" name="bandAlbums" value="<%= thyBand.albums %>" required>
     </div>
-    <input type="submit" class="btn btn-default" value='Update info' />
+    <div class="form-group">
+      <label>Extra Information</label>
+      <textarea rows="25" type="text" class="form-control" name="bandDescription"><%= thyBand.description %></textarea>
+    </div>
+    <input type="submit" class="btn btn-info" value='Update info' />
   </form>
 
   <div class="text-center">
-    <a href="/bands">Back to the list of bands</a>
+    <a href="<%= back_url %>">Back to the band's page</a>
   </div>
   <!-- <script src="js/scripts.js"></script> -->
 </body>

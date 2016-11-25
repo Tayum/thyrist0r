@@ -5,30 +5,30 @@ var fs = require('fs');
 // required for deleting the folder containing files (synchronously)
 var rimraf = require('rimraf');
 
-// band MODEL MODULE
-var bandModel = require('../models/band');
+// album MODEL MODULE
+var albumModel = require('../models/album');
 
 // CHECK whether user is authentificated MODULE
 var ensureAuth = require('../public/javascripts/ensureAuth');
 var ensureAuthFunc = new ensureAuth();
 
 router.route('/')
-	/* GET bands listing (pagination included). */
+	/* GET albums listing (pagination included). */
 	.get(ensureAuthFunc.ensureAuth, function(req, res, next) {
-		if (req.originalUrl === '/bands/') {
-			res.redirect('/bands');
+		if (req.originalUrl === '/albums/') {
+			res.redirect('/albums');
 		}
 		else {
-			let query = bandModel.count();
+			let query = albumModel.count();
 			query.exec(function(err, amount) {
 				if (err) {
 					err = new Error('Sorry, the file with contents were not found on server.');
 					err.status = 500;
 					next(err);
 				}
-				// None bands are in database
+				// None albums are in database
 				else if (amount <= 0) {
-					res.render('bands', {
+					res.render('albums', {
 						curPage: 1,
 						maxPage: 1,
 						arr: [],
@@ -36,15 +36,15 @@ router.route('/')
 					});
 				}
 				else {
-					let search_value = req.query.bandName;
+					let search_value = req.query.albumName;
 					// If search field is empty - assign search_value to ""
 					if(search_value === null ||
 						 search_value === undefined)
 					{
 						search_value = "";
 					}
-					// Receive amount of bands that meet criteria
-					query = bandModel.count({
+					// Receive amount of albums that meet criteria
+					query = albumModel.count({
 						// search (case insensitive) partial match
 						name: { "$regex": search_value, "$options": "i" }
 					});
@@ -58,7 +58,7 @@ router.route('/')
 							// if amount equals 0, notify the user about it
 							if (amount === 0) {
 								req.flash('error_msg', 'Nothing was found :(');
-								res.redirect('/bands');
+								res.redirect('/albums');
 							}
 							else {
 								let pageNumber = req.query.page;
@@ -75,11 +75,11 @@ router.route('/')
 									req.flash('error_msg', errs[0].msg);
 									// If the search field was empty: redirect to /bands
 									if (!search_value) {
-										res.redirect('/bands');
+										res.redirect('/albums');
 									}
-									// If the search field was not empty: redirect to /bands with search field that was set previously
+									// If the search field was not empty: redirect to /albums with search field that was set previously
 									else {
-										res.redirect('/bands?bandName=' + search_value);
+										res.redirect('/albums?albumName=' + search_value);
 									}
 								}
 								// If page is not set at all: set is on default (1)
@@ -87,11 +87,11 @@ router.route('/')
 									if (errs.length === 2) {
 										pageNumber = 1;
 									}
-									query = bandModel.find({
+									query = albumModel.find({
 										// search (case insensitive) partial match
 										name: { "$regex": search_value, "$options": "i" }
 									}).limit(4).skip(4 * (pageNumber - 1)).lean();
-									query.exec(function(err, bands) {
+									query.exec(function(err, albums) {
 										if (err) {
 											err = new Error('Sorry, the file with contents were not found on server.');
 											err.status = 500;
@@ -99,17 +99,17 @@ router.route('/')
 										}
 										else {
 											let arr = [];
-											let bandList = bands;
-											for (let i = 0; i < bandList.length; i++) {
-												let thyBand = bandList[i];
+											let albumList = albums;
+											for (let i = 0; i < albumList.length; i++) {
+												let thyAlbum = albumList[i];
 												arr.push({
-													title: thyBand.name,
-													href: 'bands/' + thyBand._id,
-													alt: thyBand.name + '_logo',
-													img_path: 'images/bands/' + thyBand._id + '/logo.jpg'
+													title: thyAlbum.name,
+													href: 'albums/' + thyAlbum._id,
+													alt: thyAlbum.name + '_logo',
+													img_path: 'images/albums/' + thyAlbum._id + '/logo.jpg'
 												});
 											}
-											res.render('bands', {
+											res.render('albums', {
 												curPage: pageNumber,
 												maxPage: parseInt((amount-1)/4 + 1),
 												arr: arr,
@@ -125,27 +125,28 @@ router.route('/')
 			});
 		}
 	})
-	/* POST new band. */
+	/* POST new album. */
 	.post(ensureAuthFunc.ensureAdminAuth, function(req, res, next) {
-		req.checkBody('bandMembers', 'Members field must be integer number').isInt();
-		req.checkBody('bandAlbums', 'Albums field must be integer number').isInt();
+		req.checkBody('albumTracks', 'Tracks field must be integer number').isInt();
 		let errs = req.validationErrors();
 		if (errs) {
-			res.render('addBand', {
+			res.render('addAlbum', {
 				errors: errs
 			});
 		}
 		else {
-			let newBand = new bandModel({
-				name: req.body.bandName,
-				formed: req.body.bandFormed,
-				members: req.body.bandMembers,
-				genre: req.body.bandGenre,
-				albums: req.body.bandAlbums,
-				description: req.body.bandDescription || ""
+			let newAlbum = new albumModel({
+				name: req.body.albumName,
+				rls_date: req.body.albumRls_date,
+				genre: req.body.albumGenre,
+				tracks: req.body.albumTracks,
+        // @TODO
+        // tracks_array: [],
+        // @TODO is it right?
+        band: req.body.albumBand
 			});
-			console.log("NEW CREATED BAND:\n" + newBand);
-			newBand.save(function(err, band) {
+			console.log("NEW CREATED ALBUM:\n" + newAlbum);
+			newBand.save(function(err, album) {
 				if (err) {
 					err = new Error('Sorry, the band cannot be saved to the database.');
 					err.status = 500;
@@ -153,39 +154,38 @@ router.route('/')
 				}
 				else {
 					// Create a directory (with a unique name - '_id') for the certain object
-					// and place the passed images there
-					let dir = 'public/images/bands/' + band._id;
+					// and place the passed image there
+					let dir = 'public/images/albums/' + album._id;
 			    fs.mkdir(dir, function() {
-						fs.writeFile(dir + '/logo.jpg', req.files.bandLogo.data);
-						fs.writeFile(dir + '/members.jpg', req.files.bandMembers.data);
+						fs.writeFile(dir + '/logo.jpg', req.files.albumLogo.data);
 					});
-					req.flash('success_msg', 'The band has been successfully created!');
-					res.redirect('/bands');
+					req.flash('success_msg', 'The album has been successfully created!');
+					res.redirect('/albums');
 				}
 			});
 		}
 	});
 
-// Helping DELETE function for POST method for single band
-var deleteTheBand = function(req, res, next) {
-	let bandPathId = req.params.band_id_param;
+// Helping DELETE function for POST method for single album
+var deleteTheAlbum = function(req, res, next) {
+	let albumPathId = req.params.album_id_param;
 
-	let query = bandModel.findById(bandPathId);
+	let query = albumModel.findById(albumPathId);
 
-	query.exec(function(err, band) {
+	query.exec(function(err, album) {
 		if (err) {
 			err = new Error('Sorry, the band cannot be removed from the database.');
 			err.status = 500;
 			next(err);
 		}
-		else if (band === null) {
-			let err = new Error('Sorry, there is no such band on this site.');
+		else if (album === null) {
+			let err = new Error('Sorry, there is no such album on this site.');
 			err.status = 404;
 			next(err);
 		}
 		else {
-			let dir = 'public/images/bands/' + band._id;
-			band.remove();
+			let dir = 'public/images/albums/' + album._id;
+			album.remove();
 			// Remove the directory (with a unique name - '_id') for the certain object
 			// (also removing all the files inside it)
 			rimraf(dir, function(err) {
@@ -196,119 +196,118 @@ var deleteTheBand = function(req, res, next) {
 					console.log("The folder has been successfully removed.");
 				}
 			});
-			req.flash('success_msg', 'The band has been successfully removed!');
-			res.redirect('/bands');
+			req.flash('success_msg', 'The album has been successfully removed!');
+			res.redirect('/albums');
 		}
 	});
 };
 
-// Helping UPDATE (PUT) function for POST methods for single band
-var updateTheBand = function(req, res, next) {
-	let bandPathId = req.params.band_id_param;
+// Helping UPDATE (PUT) function for POST methods for single album
+var updateTheAlbum = function(req, res, next) {
+	let albumPathId = req.params.album_id_param;
 
-	let query = bandModel.findById(bandPathId);
+	let query = albumModel.findById(albumPathId);
 
-	query.exec(function(err, band) {
+	query.exec(function(err, album) {
 		if (err) {
 			err = new Error('Sorry, the file with contents were not found on server.');
 			err.status = 500;
 			next(err);
 		}
-		else if (band === null) {
-			let err = new Error('Sorry, there is no such band on this site.');
+		else if (album === null) {
+			let err = new Error('Sorry, there is no such album on this site.');
 			err.status = 404;
 			next(err);
 		}
 		else {
-			req.checkBody('bandMembers', 'Members field must be integer number').isInt();
-			req.checkBody('bandAlbums', 'Albums field must be integer number').isInt();
+      req.checkBody('albumTracks', 'Tracks field must be integer number').isInt();
 			let errs = req.validationErrors();
 			if (errs) {
-				res.render('updateBand', {
+				res.render('updateAlbum', {
 					errors: errs,
-					band_url: bandPathId,
-					back_url: req.header('Referer') || '/bands',
-					thyBand: band
+					album_url: albumPathId,
+					back_url: req.header('Referer') || '/albums',
+					thyAlbum: album
 				});
 			}
 			else {
 				let isUpdated = false;
-				if (req.body.bandName !== band.name) {
-					band.name = req.body.bandName;
+				if (req.body.albumName !== album.name) {
+					album.name = req.body.albumName;
 					isUpdated = true;
 				}
-				if (req.body.bandFormed !== band.formed) {
-					band.formed = req.body.bandFormed;
+				if (req.body.albumRls_date !== album.albumRls_date) {
+					album.albumRls_date = req.body.albumRls_date;
 					isUpdated = true;
 				}
-				if (parseInt(req.body.bandMembers) !== band.members) {
-					band.members = parseInt(req.body.bandMembers);
+				if (req.body.albumGenre !== album.genre) {
+					album.genre = req.body.albumGenre;
 					isUpdated = true;
 				}
-				if (req.body.bandGenre !== band.genre) {
-					band.genre = req.body.bandGenre;
+				if (parseInt(req.body.albumTracks) !== album.tracks) {
+					album.tracks = parseInt(req.body.albumTracks);
 					isUpdated = true;
 				}
-				if (parseInt(req.body.bandAlbums) !== band.albums) {
-					band.albums = parseInt(req.body.bandAlbums);
-					isUpdated = true;
-				}
-				if (req.body.bandDescription !== band.description) {
-					band.description = req.body.bandDescription;
+        // @TODO
+        // add tracks_array?
+        // @TODO
+        // Is it working like this?
+				if (req.body.albumBand !== album.band) {
+					album.band = req.body.albumBand;
 					isUpdated = true;
 				}
         // if some info has been changed, render the successful UPDATE notification page
 				if (isUpdated) {
-					band.save();
-					req.flash('success_msg', 'The band has been successfully updated!');
-					res.redirect('/bands/' + bandPathId);
+					album.save();
+					req.flash('success_msg', 'The album has been successfully updated!');
+					res.redirect('/albums/' + albumPathId);
 				}
 				else {
-					req.flash('error_msg', 'The band not been updated. No changes were made.');
-					res.redirect('/bands/' + bandPathId);
+					req.flash('error_msg', 'The album not been updated. No changes were made.');
+					res.redirect('/albums/' + albumPathId);
 				}
 			}
 		}
 	});
 };
 
-router.route('/:band_id_param')
+router.route('/:album_id_param')
 	/* GET method: checking
 	WHETHER [User wants to gain a page with POST form to perform and UPDATE method]
-	OR [User simply wants to gain a page with the info of the band] */
+	OR [User simply wants to gain a page with the info of the album] */
 	.get(ensureAuthFunc.ensureAuth, function(req, res, next) {
-	  let bandPathId = req.params.band_id_param;
+	  let albumPathId = req.params.album_id_param;
 
-		let query = bandModel.findById(bandPathId);
+		let query = albumModel.findById(albumPathId);
 
-		query.exec(function(err, band) {
+		query.exec(function(err, album) {
 			if (err) {
 				err = new Error('Sorry, the file with contents were not found on server.');
 				err.status = 500;
 				next(err);
 			}
-			else if (band === null) {
-				let err = new Error('Sorry, there is no such band on this site.');
+			else if (album === null) {
+				let err = new Error('Sorry, there is no such album on this site.');
 				err.status = 404;
 				next(err);
 			}
 			else {
-				// if the band is about to be UPDATED, render the page with the UPDATE fields
+				// if the album is about to be UPDATED, render the page with the UPDATE fields
 				if (req.query.q === "toUpdate") {
-					res.render('updateBand', {
+					res.render('updateAlbum', {
 						errors: null,
-						band_url: bandPathId,
-						back_url: req.header('Referer') || '/bands',
-						thyBand: band
+						album_url: albumPathId,
+						back_url: req.header('Referer') || '/albums',
+						thyAlbum: album
 					});
 				}
 				else {
-					// else simply render single certain band
-		      res.render('singleBand', {
-		        img_path: '/images/bands/' + band._id + '/members.jpg',
-						band_url: bandPathId,
-						back_url: req.header('Referer') || '/bands',
-						band: band
+					// else simply render single certain album
+		      res.render('singleAlbum', {
+		        img_path: '/images/albums/' + album._id + '/logo.jpg',
+						album_url: albumPathId,
+						back_url: req.header('Referer') || '/albums',
+						album: album
 		      });
 				}
 			}
@@ -316,25 +315,25 @@ router.route('/:band_id_param')
 	})
 	/* POST method: checking
 	WHETHER [UPDATE or DELETE button was pressed]
-	OR [the info about some band was UPDATED] */
+	OR [the info about some album was UPDATED] */
 	.post(ensureAuthFunc.ensureAdminAuth, function(req, res, next) {
 		let thyQuery = req.query.q;
 		// DELETE button was pressed
 		if (thyQuery === "delete") {
-			deleteTheBand(req, res, next);
+			deleteTheAlbum(req, res, next);
 		}
 		// UPDATE button was pressed
 		else if (thyQuery === "update") {
-			res.redirect(req.params.band_id_param + "?q=toUpdate");
+			res.redirect(req.params.album_id_param + "?q=toUpdate");
 		}
-		// the band has been UPDATED
+		// the album has been UPDATED
 		else if (req.query.q === "isUpdated") {
-			updateTheBand(req, res, next);
+			updateTheAlbum(req, res, next);
 		}
 		// None of cases above (nothing special)?
-		// Simply redirect the user to the page with the info of the band
+		// Simply redirect the user to the page with the info of the album
 		else {
-			res.redirect(req.params.band_id_param);
+			res.redirect(req.params.album_id_param);
 		}
 	});
 

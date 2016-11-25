@@ -78,7 +78,8 @@ router.route('/bands')
         formed: req.body.bandFormed,
         members: req.body.bandMembers,
         genre: req.body.bandGenre,
-        albums: req.body.bandAlbums
+        albums: req.body.bandAlbums,
+        description: req.body.description || ""
       });
       console.log("NEW CREATED BAND:\n" + newBand);
       newBand.save(function(err, band) {
@@ -214,6 +215,10 @@ router.route('/bands')
           }
           if (parseInt(req.body.bandAlbums) !== band.albums) {
             band.albums = parseInt(req.body.bandAlbums);
+            isUpdated = true;
+          }
+          if (req.body.bandDescription !== band.description) {
+            band.description = req.body.bandDescription;
             isUpdated = true;
           }
           // if some info has been changed, send the successful UPDATE notification text

@@ -3,12 +3,16 @@ const mongoose = require('mongoose');
 
 var Schema = mongoose.Schema;
 
+const Album = require('./album');
+
 var bandSchema = new Schema({
 	name: String,
 	formed: String,
 	members: Number,
 	genre: String,
-	albums: Number
+	albums: Number,
+	description: String,
+	albums_array: [ { type: Schema.Types.ObjectId, ref:"Album" } ]
 });
 
 var bandModel = mongoose.model('Band', bandSchema);
