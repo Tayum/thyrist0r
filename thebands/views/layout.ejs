@@ -27,6 +27,9 @@
             <% if (user) { %>
               <li><a href="/users/profile/<%= user.username %>"><%= user.username %></a></li>
               <li><a href="/users/logout">Logout</a></li>
+              <% if (user.access_level === 10) { %>
+                <li><a href="/users">Users</a></li>
+              <% } %>
             <% } %>
             <li><a href="/about">About</a></li>
           </ul>

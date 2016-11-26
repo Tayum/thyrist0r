@@ -19,6 +19,16 @@
         <p><b>Amount of members</b>: <%= band.members %></p>
         <p><b>Main genre</b>: <%= band.genre %></p>
         <p><b>Amount of albums</b>: <%= band.albums %></p>
+        <p>
+          <b>The list of albums</b>:<br>
+          <ul class="list-unstyled">
+            <% if (band.albums_array) { %>
+              <% for (let i = 0; i < band.albums_array.length; i++) { %>
+                <li><a href="/albums/<%= band.albums_array[i]._id %>"><%= band.albums_array[i].name %></a></li>
+              <% } %>
+            <% } %>
+          </ul>
+        </p>
         <p><b>Description</b>: <%= band.description %></p>
       </div>
     </div>

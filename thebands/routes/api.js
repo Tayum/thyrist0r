@@ -196,41 +196,15 @@ router.route('/bands')
           res.end();
         }
         else {
-          let isUpdated = false;
-          if (req.body.bandName !== band.name) {
-            band.name = req.body.bandName;
-            isUpdated = true;
-          }
-          if (req.body.bandFormed !== band.formed) {
-            band.formed = req.body.bandFormed;
-            isUpdated = true;
-          }
-          if (parseInt(req.body.bandMembers) !== band.members) {
-            band.members = parseInt(req.body.bandMembers);
-            isUpdated = true;
-          }
-          if (req.body.bandGenre !== band.genre) {
-            band.genre = req.body.bandGenre;
-            isUpdated = true;
-          }
-          if (parseInt(req.body.bandAlbums) !== band.albums) {
-            band.albums = parseInt(req.body.bandAlbums);
-            isUpdated = true;
-          }
-          if (req.body.bandDescription !== band.description) {
-            band.description = req.body.bandDescription;
-            isUpdated = true;
-          }
-          // if some info has been changed, send the successful UPDATE notification text
-          if (isUpdated) {
-            band.save();
-            res.send("The band has been successfully updated.");
-            res.end();
-          }
-          else {
-            res.send("The band has not been updated. Reason:\nNo changes were made.");
-            res.end();
-          }
+          band.name = req.body.bandName;
+          band.formed = req.body.bandFormed;
+          band.members = parseInt(req.body.bandMembers);
+          band.genre = req.body.bandGenre;
+          band.albums = parseInt(req.body.bandAlbums);
+          band.description = req.body.bandDescription;
+          
+          band.save();
+          res.send("The band has been successfully updated.");
         }
       }
     });

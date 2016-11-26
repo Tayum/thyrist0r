@@ -2,11 +2,10 @@ var express = require('express');
 var router = express.Router();
 var path = require('path');
 var fs = require('fs');
-// required for deleting the folder containing files (synchronously)
-var rimraf = require('rimraf');
 
 // band MODEL MODULE
-var bandModel = require('../models/band');
+var bandModel = require('../models/bandModel');
+var bandFuncs = require('../models/band');
 
 // CHECK whether user is authentificated MODULE
 var ensureAuth = require('../public/javascripts/ensureAuth');
@@ -142,6 +141,7 @@ router.route('/')
 				members: req.body.bandMembers,
 				genre: req.body.bandGenre,
 				albums: req.body.bandAlbums,
+				albums_array: [],
 				description: req.body.bandDescription || ""
 			});
 			console.log("NEW CREATED BAND:\n" + newBand);
@@ -170,7 +170,7 @@ router.route('/')
 var deleteTheBand = function(req, res, next) {
 	let bandPathId = req.params.band_id_param;
 
-	let query = bandModel.findById(bandPathId);
+	let query = bandModel.findById(bandPathId).populate('albums_array');
 
 	query.exec(function(err, band) {
 		if (err) {
@@ -184,18 +184,7 @@ var deleteTheBand = function(req, res, next) {
 			next(err);
 		}
 		else {
-			let dir = 'public/images/bands/' + band._id;
-			band.remove();
-			// Remove the directory (with a unique name - '_id') for the certain object
-			// (also removing all the files inside it)
-			rimraf(dir, function(err) {
-				if(err) {
-					console.log("ERROR WHILE DELETING THE FOLDER!");
-				}
-				else {
-					console.log("The folder has been successfully removed.");
-				}
-			});
+			bandFuncs.deleteBand(band);
 			req.flash('success_msg', 'The band has been successfully removed!');
 			res.redirect('/bands');
 		}
@@ -206,7 +195,7 @@ var deleteTheBand = function(req, res, next) {
 var updateTheBand = function(req, res, next) {
 	let bandPathId = req.params.band_id_param;
 
-	let query = bandModel.findById(bandPathId);
+	let query = bandModel.findById(bandPathId).populate('albums');
 
 	query.exec(function(err, band) {
 		if (err) {
@@ -232,41 +221,16 @@ var updateTheBand = function(req, res, next) {
 				});
 			}
 			else {
-				let isUpdated = false;
-				if (req.body.bandName !== band.name) {
-					band.name = req.body.bandName;
-					isUpdated = true;
-				}
-				if (req.body.bandFormed !== band.formed) {
-					band.formed = req.body.bandFormed;
-					isUpdated = true;
-				}
-				if (parseInt(req.body.bandMembers) !== band.members) {
-					band.members = parseInt(req.body.bandMembers);
-					isUpdated = true;
-				}
-				if (req.body.bandGenre !== band.genre) {
-					band.genre = req.body.bandGenre;
-					isUpdated = true;
-				}
-				if (parseInt(req.body.bandAlbums) !== band.albums) {
-					band.albums = parseInt(req.body.bandAlbums);
-					isUpdated = true;
-				}
-				if (req.body.bandDescription !== band.description) {
-					band.description = req.body.bandDescription;
-					isUpdated = true;
-				}
-        // if some info has been changed, render the successful UPDATE notification page
-				if (isUpdated) {
-					band.save();
-					req.flash('success_msg', 'The band has been successfully updated!');
-					res.redirect('/bands/' + bandPathId);
-				}
-				else {
-					req.flash('error_msg', 'The band not been updated. No changes were made.');
-					res.redirect('/bands/' + bandPathId);
-				}
+				band.name = req.body.bandName;
+				band.formed = req.body.bandFormed;
+				band.members = parseInt(req.body.bandMembers);
+				band.genre = req.body.bandGenre;
+				band.albums = parseInt(req.body.bandAlbums);
+				band.description = req.body.bandDescription;
+				
+				band.save();
+				req.flash('success_msg', 'The band has been successfully updated!');
+				res.redirect('/bands/' + bandPathId);
 			}
 		}
 	});
@@ -279,7 +243,7 @@ router.route('/:band_id_param')
 	.get(ensureAuthFunc.ensureAuth, function(req, res, next) {
 	  let bandPathId = req.params.band_id_param;
 
-		let query = bandModel.findById(bandPathId);
+		let query = bandModel.findById(bandPathId).populate('albums_array');
 
 		query.exec(function(err, band) {
 			if (err) {
@@ -294,6 +258,7 @@ router.route('/:band_id_param')
 			}
 			else {
 				// if the band is about to be UPDATED, render the page with the UPDATE fields
+				console.log(band);
 				if (req.query.q === "toUpdate") {
 					res.render('updateBand', {
 						errors: null,

@@ -1,0 +1,63 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+
+  <title><%= album.name %></title>
+  <link rel="stylesheet" href="/stylesheets/centered-columns.css">
+  <link rel="stylesheet" href="/stylesheets/rightside-thumbnail.css">
+</head>
+
+<body>
+  <div class="container-fluid">
+    <div class="thumbnail right-caption">
+      <img src="<%= img_path %>" width="300" height="200" alt="<%= album.name %>_logo">
+      <div class="caption">
+        <h3><%= album.name %></h3>
+        <h4><b>Band:</b> <a href="/bands/<%= album.band._id %>"><%= album.band.name %></a></h4>
+        <p><b>Release date</b>:
+          <% let albumDate = album.rls_date.split('-', 3); %>
+          <%= albumDate[2] %>.<%= albumDate[1] %>.<%= albumDate[0] %>
+        </p>
+        <p><b>Genre of an album</b>: <%= album.genre %></p>
+        <p><b>Amount of tracks</b>: <%= album.tracks %></p>
+        <p>
+          <b>The list of tracks</b>:<br>
+          <ul class="list-unstyled">
+            <% if (album.tracks_array) { %>
+              <% for (let i = 0; i < album.tracks_array.length; i++) { %>
+                <li><a href="/tracks/<%= album.tracks_array[i]._id %>"><%= album.tracks_array[i].name %></a></li>
+              <% } %>
+            <% } %>
+          </ul>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <% if (user.access_level === 10) { %>
+    <div class="col-sm-3 col-md-12">
+      <div class="row row-centered">
+        <form action="/albums/<%= album_url %>?q=update" method="POST">
+          <input type="submit" class="btn btn-info" value='Update the info' />
+        </form>
+      </div>
+      <br>
+      <div class="row row-centered">
+        <form action="/albums/<%= album_url %>?q=delete" method="POST">
+          <input type="submit" class="btn btn-danger" value='Delete this album' />
+        </form>
+      </div>
+      <br>
+    </div>
+  <% } %>
+
+  <div class="text-center">
+    <a href="<%= back_url %>">Back to the previous page</a>
+  </div>
+
+  <!-- <script src="js/scripts.js"></script> -->
+</body>
+
+</html>

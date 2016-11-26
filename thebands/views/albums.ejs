@@ -5,7 +5,7 @@
 <head>
     <meta charset="utf-8">
 
-    <title>List of Bands</title>
+    <title>List of Albums</title>
 
     <link rel="stylesheet" href="/stylesheets/centered-columns.css">
 </head>
@@ -13,13 +13,13 @@
 <body>
   <div class="container-fluid">
     <div class="col-md-4 col-md-offset-4">
-      <form action="/bands" method="GET">
+      <form action="/albums" method="GET">
         <div class="input-group">
           <% if(search_value.length > 0) { %>
-            <input type="text" name="bandName" value='<%= search_value %>' class="form-control" placeholder="Enter band's name..." required />
+            <input type="text" name="albumName" value='<%= search_value %>' class="form-control" placeholder="Enter album's name..." required />
           <% } %>
           <% if(search_value.length === 0) { %>
-            <input type="text" name="bandName" class="form-control" placeholder="Enter band's name..." required />
+            <input type="text" name="albumName" class="form-control" placeholder="Enter album's name..." required />
           <% } %>
           <span class="input-group-btn">
             <input type="submit" class="btn btn-info" value='Search'>
@@ -38,6 +38,7 @@
           <img src="<%= arr[i].img_path %>" width="256" height="256" alt="<%= arr[i].alt %>">
           <div class="caption">
             <h3><%= arr[i].title %></h3>
+            <h4><b>Band:</b> <a href="/bands/<%= arr[i].bandHref %>"><%= arr[i].bandName %></a></h4>
             <p><a href="<%= arr[i].href %>" class="btn btn-primary" role="button">More...</a></p>
           </div>
         </div>
@@ -60,14 +61,14 @@
         <% if (curPage > 1) { %>
           <% if (search_value.length > 0) { %>
             <li>
-              <a href="/bands?page=<%= (curPage - 1) %>&amp;bandName=<%= search_value %>" aria-label="Previous">
+              <a href="/albums?page=<%= (curPage - 1) %>&amp;albumName=<%= search_value %>" aria-label="Previous">
                 <span aria-hidden="true">&laquo;</span>
               </a>
             </li>
           <% } %>
           <% if (search_value.length <= 0) { %>
             <li>
-              <a href="/bands?page=<%= (curPage - 1) %>" aria-label="Previous">
+              <a href="/albums?page=<%= (curPage - 1) %>" aria-label="Previous">
                 <span aria-hidden="true">&laquo;</span>
               </a>
             </li>
@@ -75,10 +76,10 @@
         <% } %>
         <% if (curPage > 1) { %>
           <% if (search_value.length > 0) { %>
-            <li><a href="/bands?page=<%= (curPage - 1) %>&amp;bandName=<%= search_value %>"><%= (curPage - 1) %></a></li>
+            <li><a href="/albums?page=<%= (curPage - 1) %>&amp;albumName=<%= search_value %>"><%= (curPage - 1) %></a></li>
           <% } %>
           <% if (search_value.length <= 0) { %>
-            <li><a href="/bands?page=<%= (curPage - 1) %>"><%= (curPage - 1) %></a></li>
+            <li><a href="/albums?page=<%= (curPage - 1) %>"><%= (curPage - 1) %></a></li>
           <% } %>
         <% } %>
         <li class="active">
@@ -86,17 +87,17 @@
         </li>
         <% if (curPage < maxPage) { %>
           <% if (search_value.length > 0) { %>
-            <li><a href="/bands?page=<%= (curPage - -1) %>&amp;bandName=<%= search_value %>"><%= (curPage - -1) %></a></li>
+            <li><a href="/albums?page=<%= (curPage - -1) %>&amp;albumName=<%= search_value %>"><%= (curPage - -1) %></a></li>
             <li>
-              <a href="/bands?page=<%= (curPage - -1) %>&amp;bandName=<%= search_value %>" aria-label="Next">
+              <a href="/albums?page=<%= (curPage - -1) %>&amp;albumName=<%= search_value %>" aria-label="Next">
                 <span aria-hidden="true">&raquo;</span>
               </a>
             </li>
           <% } %>
           <% if (search_value.length <= 0) { %>
-            <li><a href="/bands?page=<%= (curPage - -1) %>"><%= (curPage - -1) %></a></li>
+            <li><a href="/albums?page=<%= (curPage - -1) %>"><%= (curPage - -1) %></a></li>
             <li>
-              <a href="/bands?page=<%= (curPage - -1) %>" aria-label="Next">
+              <a href="/albums?page=<%= (curPage - -1) %>" aria-label="Next">
                 <span aria-hidden="true">&raquo;</span>
               </a>
             </li>
@@ -115,11 +116,11 @@
   </div>
 
   <!-- if admin requests this page:
-  the button to add the band is also at the bottom -->
+  the button to add the album is also at the bottom -->
   <% if(parseInt(user.access_level) === 10) { %>
     <div class="container-fluid">
       <div class="text-center">
-          <a href="/addband">Add new band</a>
+          <a href="/addalbum">Add new album</a>
       </div>
     </div>
   <% } %>

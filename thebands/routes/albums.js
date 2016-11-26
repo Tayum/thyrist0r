@@ -5,8 +5,11 @@ var fs = require('fs');
 // required for deleting the folder containing files (synchronously)
 var rimraf = require('rimraf');
 
+// band MODEL MODULE
+var bandModel = require('../models/bandModel');
 // album MODEL MODULE
-var albumModel = require('../models/album');
+var albumModel = require('../models/albumModel');
+var albumFuncs = require('../models/album');
 
 // CHECK whether user is authentificated MODULE
 var ensureAuth = require('../public/javascripts/ensureAuth');
@@ -90,7 +93,7 @@ router.route('/')
 									query = albumModel.find({
 										// search (case insensitive) partial match
 										name: { "$regex": search_value, "$options": "i" }
-									}).limit(4).skip(4 * (pageNumber - 1)).lean();
+									}).populate('band').limit(4).skip(4 * (pageNumber - 1)).lean();
 									query.exec(function(err, albums) {
 										if (err) {
 											err = new Error('Sorry, the file with contents were not found on server.');
@@ -106,7 +109,9 @@ router.route('/')
 													title: thyAlbum.name,
 													href: 'albums/' + thyAlbum._id,
 													alt: thyAlbum.name + '_logo',
-													img_path: 'images/albums/' + thyAlbum._id + '/logo.jpg'
+													img_path: 'images/albums/' + thyAlbum._id + '/logo.jpg',
+													bandHref: thyAlbum.band._id,
+													bandName: thyAlbum.band.name
 												});
 											}
 											res.render('albums', {
@@ -135,33 +140,19 @@ router.route('/')
 			});
 		}
 		else {
-			let newAlbum = new albumModel({
+			let newAlbumObj = {
 				name: req.body.albumName,
 				rls_date: req.body.albumRls_date,
 				genre: req.body.albumGenre,
 				tracks: req.body.albumTracks,
-        // @TODO
         // tracks_array: [],
-        // @TODO is it right?
-        band: req.body.albumBand
-			});
-			console.log("NEW CREATED ALBUM:\n" + newAlbum);
-			newBand.save(function(err, album) {
-				if (err) {
-					err = new Error('Sorry, the band cannot be saved to the database.');
-					err.status = 500;
-					next(err);
-				}
-				else {
-					// Create a directory (with a unique name - '_id') for the certain object
-					// and place the passed image there
-					let dir = 'public/images/albums/' + album._id;
-			    fs.mkdir(dir, function() {
-						fs.writeFile(dir + '/logo.jpg', req.files.albumLogo.data);
-					});
-					req.flash('success_msg', 'The album has been successfully created!');
-					res.redirect('/albums');
-				}
+        band: req.body.albumBand,
+				albumLogo: req.files.albumLogo.data
+			};
+			
+			albumFuncs.createAlbum(newAlbumObj, function() {
+				req.flash('success_msg', 'The album has been successfully created!');
+				res.redirect('/albums');
 			});
 		}
 	});
@@ -170,7 +161,7 @@ router.route('/')
 var deleteTheAlbum = function(req, res, next) {
 	let albumPathId = req.params.album_id_param;
 
-	let query = albumModel.findById(albumPathId);
+	let query = albumModel.findById(albumPathId).populate('band').populate('tracks_array');
 
 	query.exec(function(err, album) {
 		if (err) {
@@ -184,18 +175,7 @@ var deleteTheAlbum = function(req, res, next) {
 			next(err);
 		}
 		else {
-			let dir = 'public/images/albums/' + album._id;
-			album.remove();
-			// Remove the directory (with a unique name - '_id') for the certain object
-			// (also removing all the files inside it)
-			rimraf(dir, function(err) {
-				if(err) {
-					console.log("ERROR WHILE DELETING THE FOLDER!");
-				}
-				else {
-					console.log("The folder has been successfully removed.");
-				}
-			});
+			albumFuncs.deleteAlbum(album);
 			req.flash('success_msg', 'The album has been successfully removed!');
 			res.redirect('/albums');
 		}
@@ -206,7 +186,7 @@ var deleteTheAlbum = function(req, res, next) {
 var updateTheAlbum = function(req, res, next) {
 	let albumPathId = req.params.album_id_param;
 
-	let query = albumModel.findById(albumPathId);
+	let query = albumModel.findById(albumPathId).populate('band').populate('tracks_array');
 
 	query.exec(function(err, album) {
 		if (err) {
@@ -231,41 +211,18 @@ var updateTheAlbum = function(req, res, next) {
 				});
 			}
 			else {
-				let isUpdated = false;
-				if (req.body.albumName !== album.name) {
-					album.name = req.body.albumName;
-					isUpdated = true;
-				}
-				if (req.body.albumRls_date !== album.albumRls_date) {
-					album.albumRls_date = req.body.albumRls_date;
-					isUpdated = true;
-				}
-				if (req.body.albumGenre !== album.genre) {
-					album.genre = req.body.albumGenre;
-					isUpdated = true;
-				}
-				if (parseInt(req.body.albumTracks) !== album.tracks) {
-					album.tracks = parseInt(req.body.albumTracks);
-					isUpdated = true;
-				}
-        // @TODO
-        // add tracks_array?
-        // @TODO
-        // Is it working like this?
-				if (req.body.albumBand !== album.band) {
-					album.band = req.body.albumBand;
-					isUpdated = true;
-				}
-        // if some info has been changed, render the successful UPDATE notification page
-				if (isUpdated) {
-					album.save();
+				let updAlbumObj = {
+					name: req.body.albumName,
+					rls_date: req.body.albumRls_date,
+					genre: req.body.albumGenre,
+					tracks: parseInt(req.body.albumTracks),
+					band: req.body.albumBand
+				};
+
+				albumFuncs.updateAlbum(album, updAlbumObj, function() {
 					req.flash('success_msg', 'The album has been successfully updated!');
 					res.redirect('/albums/' + albumPathId);
-				}
-				else {
-					req.flash('error_msg', 'The album not been updated. No changes were made.');
-					res.redirect('/albums/' + albumPathId);
-				}
+				});
 			}
 		}
 	});
@@ -278,7 +235,7 @@ router.route('/:album_id_param')
 	.get(ensureAuthFunc.ensureAuth, function(req, res, next) {
 	  let albumPathId = req.params.album_id_param;
 
-		let query = albumModel.findById(albumPathId);
+		let query = albumModel.findById(albumPathId).populate('band').populate('tracks_array');
 
 		query.exec(function(err, album) {
 			if (err) {

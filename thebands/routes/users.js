@@ -13,9 +13,58 @@ var ensureAuth = require('../public/javascripts/ensureAuth');
 var ensureAuthFunc = new ensureAuth();
 
 router.route('/')
-  /* Simply redirect to home page. */
-  .get(function(req, res, next) {
-    res.redirect('back');
+  /* GET the list of Users (just for admin) */
+  .get(ensureAuthFunc.ensureAdminAuth, function(req, res, next) {
+    // Admin requests this page (with all users (pagination included))
+    userModel.getAmount(function(err, amount) {
+      if (err) {
+        err = new Error('Sorry, cannot receive the amount of users.');
+        err.status = 500;
+        next(err);
+      }
+      else {
+        let pageNumber = req.query.page;
+        req.checkQuery('page', 'Page is required').notEmpty();
+        req.checkQuery('page', 'Page should lay in proper bounds (from 1 to ' + parseInt((amount-1)/20 + 1) + ')').isInt({ min: 1, max: parseInt((amount-1)/20 + 1) });
+        let errs = req.validationErrors();
+        // If page is set improperly
+        if (errs.length === 1) {
+          req.flash('error_msg', errs[0].msg);
+          res.redirect('/users');
+        }
+        // If page is not set at all: set is on default (1)
+        else {
+          if (errs.length === 2) {
+            pageNumber = 1;
+          }
+          userModel.getAllUsers(pageNumber, function(err, users) {
+            if (err) {
+              err = new Error('Sorry, cannot GET all the users.');
+              err.status = 500;
+              next(err);
+            }
+            else {
+              let arr = [];
+              for (let i = 0; i < users.length; i++) {
+                arr.push({
+                  access_level: users[i].access_level,
+                  name: users[i].name,
+                  email: users[i].email,
+                  username: users[i].username,
+                  img_path: '/images/users/' + users[i]._id + '/avatar.jpg',
+                  href: '/users/profile/' + users[i].username
+                });
+              }
+              res.render('users', {
+                curPage: pageNumber,
+                maxPage: parseInt((amount-1)/20 + 1),
+                arr: arr
+              });
+            }
+          });
+        }
+      }
+    });
   });
 
 router.route('/register')
@@ -172,75 +221,20 @@ router.route('/profile/:user_username_param')
           req.flash('error_msg', 'The user with such a name was not found.');
           res.redirect('back');
         }
-        // Admin access level:
-        else if(req.user &&
-                parseInt(req.user.access_level) === 10 &&
-                req.user.username.toLowerCase() === userPathUsername.toLowerCase())
-        {
-          // Admin requests his page (with all users (pagination included))
-          userModel.getAmount(function(err, amount) {
-            if (err) {
-              err = new Error('Sorry, cannot receive the amount of users.');
-              err.status = 500;
-              next(err);
-            }
-            else {
-              let pageNumber = req.query.page;
-              req.checkQuery('page', 'Page is required').notEmpty();
-              req.checkQuery('page', 'Page should lay in proper bounds (from 1 to ' + parseInt((amount-1)/20 + 1) + ')').isInt({ min: 1, max: parseInt((amount-1)/20 + 1) });
-              let errs = req.validationErrors();
-              // If page is set improperly
-              if (errs.length === 1) {
-                req.flash('error_msg', errs[0].msg);
-                res.redirect('/users/profile/' + req.params.user_username_param);
-              }
-              // If page is not set at all: set is on default (1)
-              else {
-                if (errs.length === 2) {
-                  pageNumber = 1;
-                }
-                userModel.getAllUsers(pageNumber, function(err, users) {
-                  if (err) {
-                    err = new Error('Sorry, cannot GET all the users.');
-                    err.status = 500;
-                    next(err);
-                  }
-                  else {
-                    let arr = [];
-                    for (let i = 0; i < users.length; i++) {
-                      arr.push({
-                        access_level: users[i].access_level,
-                        name: users[i].name,
-                        email: users[i].email,
-                        username: users[i].username,
-                        img_path: '/images/users/' + users[i]._id + '/avatar.jpg',
-                        href: '/users/profile/' + users[i].username
-                      });
-                    }
-                    res.render('userPage', {
-                      curPage: pageNumber,
-                      maxPage: parseInt((amount-1)/20 + 1),
-                      arr: arr
-                    });
-                  }
-                });
-              }
-            }
-          });
-        }
         // Any other page request for any authorised user (including admin)
         else {
-          let arr = [];
-          arr.push({
+          let userPageUrl = '/users/profile/' + req.user.username;
+          let thyUser = {
             access_level: user.access_level,
             name: user.name,
             email: user.email,
             username: user.username,
             img_path: '/images/users/' + user._id + '/avatar.jpg',
             href: '/users/profile/' + user.username
-          });
+          };
           res.render('userPage', {
-            arr: arr
+            thyUser: thyUser,
+            back_url: req.header('Referer') || userPageUrl
           });
         }
       }

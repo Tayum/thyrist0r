@@ -1,0 +1,47 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+
+  <title>Update the album</title>
+</head>
+
+<body>
+  <h2 class="page-header">Update the album</h2>
+  <% if (errors) { %>
+      <% for (let i = 0; i < errors.length; i++) { %>
+        <div class="alert alert-danger"><%= errors[i].msg %></div>
+      <% } %>
+  <% } %>
+  <form action="/albums/<%= album_url %>?q=isUpdated" method="POST">
+    <div class="form-group">
+      <label>Name of the album</label>
+      <input type="text" class="form-control" placeholder="Album's name. Current value: <%= thyAlbum.name %>" name="albumName" value='<%= thyAlbum.name %>' required>
+    </div>
+    <div class="form-group">
+      <label>Date of release</label>
+      <input type="text" class="form-control" placeholder="Date of album's release. For example, 2005-06-15. Current value: <%= thyAlbum.rls_date %>" name="albumRls_date" value="<%= thyAlbum.rls_date %>" required>
+    </div>
+    <div class="form-group">
+      <label>Genre</label>
+      <input type="text" class="form-control" placeholder="Genre of the album. Current value: <%= thyAlbum.genre %>" name="albumGenre" value="<%= thyAlbum.genre %>" required>
+    </div>
+    <div class="form-group">
+      <label>Tracks</label>
+      <input type="number" min="1" class="form-control" placeholder="Amount of tracks in album. Current value: <%= thyAlbum.tracks %>" name="albumTracks" value="<%= thyAlbum.tracks %>" required>
+    </div>
+    <div class="form-group">
+      <label>Band</label>
+      <input input type="text" class="form-control" placeholder="The creator of the album. Please, write the ID of the band here. Current value: <%= thyAlbum.band._id %>" name="albumBand" value="<%= thyAlbum.band._id %>" required>
+    </div>
+    <input type="submit" class="btn btn-info" value='Update info' />
+  </form>
+
+  <div class="text-center">
+    <a href="<%= back_url %>">Back to the album's page</a>
+  </div>
+  <!-- <script src="js/scripts.js"></script> -->
+</body>
+
+</html>
