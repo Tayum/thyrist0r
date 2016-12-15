@@ -26,6 +26,7 @@ mongoose.connect(url);
 var routes = require('./routes/index');
 var bands = require('./routes/bands');
 var albums = require('./routes/albums');
+var tracks = require('./routes/tracks');
 var api = require('./routes/api');
 var users = require('./routes/users');
 
@@ -47,7 +48,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 // busboy-body-parser
-app.use(busboyBodyParser({ limit: '20mb' }));
+app.use(busboyBodyParser({ limit: '40mb' }));
 
 // Express Session
 app.use(session({
@@ -93,6 +94,7 @@ app.use(function(req, res, next) {
 app.use('/', routes);
 app.use('/bands', bands);
 app.use('/albums', albums);
+app.use('/tracks', tracks);
 app.use('/api', api);
 app.use('/users', users);
 

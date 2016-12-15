@@ -1,0 +1,53 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+
+  <title>New track</title>
+
+  <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+</head>
+
+<body>
+  <h1 class="page-header">Be a part of The Bands community.</h1>
+  <h2>Add new track</h2>
+  <% if (errors) { %>
+      <% for (let i = 0; i < errors.length; i++) { %>
+        <div class="alert alert-danger"><%= errors[i].msg %></div>
+      <% } %>
+  <% } %>
+  <form action="/tracks" enctype="multipart/form-data" method="POST">
+    <div class="form-group">
+      <label>Name of the track</label>
+      <input type="text" class="form-control" placeholder="Track's name" name="trackName" required>
+    </div>
+    <!--<div class="form-group">
+      <label>File size</label>
+      <input type="text" class="form-control" placeholder="The size of the track's file." name="trackFile_size" required>
+    </div>-->
+    <!--<div class="form-group">
+      <label>Duration</label>
+      <input type="text" class="form-control" placeholder="Duration of the track" name="trackDuration" required>
+    </div>-->
+    <div class="form-group">
+      <label>Track number</label>
+      <input type="number" min="1" class="form-control" placeholder="The number of track in the album" name="trackNumber" required>
+    </div>
+    <div class="form-group">
+      <label>Album</label>
+      <input input type="text" class="form-control" placeholder="The album that contains the song. Please, write the ID of the album here" name="trackAlbum" required>
+    </div>
+    <div class="form-group">
+      <label>Track by itself</label>
+      <input type="file" accept="audio/mpeg" name="trackTrack_raw">
+    </div>
+    <input type="submit" class="btn btn-success" value='Add' />
+  </form>
+
+  <div class="text-center" >
+    <a href="/">Back</a>
+  </div>
+
+</body>
+</html>

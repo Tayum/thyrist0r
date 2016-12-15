@@ -36,4 +36,12 @@ router.route('/addalbum')
     });
   });
 
+router.route('/addtrack')
+  /* GET the page with the POST form of creating the new track. */
+  .get(ensureAuthFunc.ensureAdminAuth, function(req, res, next) {
+    res.render('addTrack', {
+      errors: null
+    });
+  });
+
 module.exports = router;

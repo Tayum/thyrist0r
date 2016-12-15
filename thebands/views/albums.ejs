@@ -124,6 +124,15 @@
       </div>
     </div>
   <% } %>
+  <!-- if admin requests this page:
+  the button to add the song is also at the bottom -->
+  <% if(parseInt(user.access_level) === 10) { %>
+    <div class="container-fluid">
+      <div class="text-center">
+          <a href="/addtrack">Add new track</a>
+      </div>
+    </div>
+  <% } %>
 
     <!-- <script src="js/scripts.js"></script> -->
 </body>

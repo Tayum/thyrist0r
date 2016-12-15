@@ -7,17 +7,17 @@ var rimraf = require('rimraf');
 
 var Schema = mongoose.Schema;
 
+const trackModel = require('./trackModel');
+const trackFuncs = require('./track');
 const albumModel = require('./albumModel');
 const bandModel = require('./bandModel');
-// const trackModel = require('./trackModel');
+
 
 module.exports.deleteAlbum = function(albumRef) {
 	let query = albumModel.findById(albumRef._id).populate('band');
 	query.exec(function(err, album) {
 		if (err) {
-			err = new Error('Sorry, the album cannot be removed from the database.');
-			err.status = 500;
-			next(err);
+			console.log('ERROR: the album cannot be removed from the database.');
 		}
 		else {
 			// Unlink the album on the band's side
@@ -34,7 +34,7 @@ module.exports.deleteAlbum = function(albumRef) {
 				}
 				if (album.tracks_array) {
 					for (let i = 0; i < album.tracks_array.length; i++) {
-						// deleteTrack(album.tracks_array[i]);
+						deleteTrack(album.tracks_array[i]);
 					}
 				}
 				let dir = 'public/images/albums/' + album._id;
@@ -60,15 +60,12 @@ module.exports.createAlbum = function(infoObj, cb) {
 		rls_date: infoObj.rls_date,
 		genre: infoObj.genre,
 		tracks: infoObj.tracks,
-		// tracks_array: infoObj.tracks_array,
+		tracks_array: infoObj.tracks_array,
 		band: infoObj.band
 	});
-	console.log("NEW CREATED ALBUM:\n" + newAlbum);
 	newAlbum.save(function(err, album) {
 		if (err) {
-			err = new Error('Sorry, the album cannot be saved to the database.');
-			err.status = 500;
-			next(err);
+			console.log("ERROR: the album cannot be saved to the database.");
 		}
 		else {
 			// Link the album on the band's side

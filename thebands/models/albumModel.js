@@ -8,7 +8,7 @@ var albumSchema = new Schema({
 	rls_date: String,
 	genre: String,
 	tracks: Number,
-  // tracks_array: [ { type: Schema.Types.ObjectId, ref:"Track" } ]
+  tracks_array: [ { type: Schema.Types.ObjectId, ref:"Track" } ],
 	band: { type: Schema.Types.ObjectId, ref: "Band" }
 });
 

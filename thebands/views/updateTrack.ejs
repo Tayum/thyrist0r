@@ -1,0 +1,47 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+
+  <title>Update the track</title>
+</head>
+
+<body>
+  <h2 class="page-header">Update the track</h2>
+  <% if (errors) { %>
+      <% for (let i = 0; i < errors.length; i++) { %>
+        <div class="alert alert-danger"><%= errors[i].msg %></div>
+      <% } %>
+  <% } %>
+  <form action="/tracks/<%= track_url %>?q=isUpdated" method="POST">
+    <div class="form-group">
+      <label>Name of the track</label>
+      <input type="text" class="form-control" placeholder="Track's name. Current value: <%= thyTrack.name %>" name="trackName" value='<%= thyTrack.name %>' required>
+    </div>
+    <!--<div class="form-group">
+      <label>File size</label>
+      <input type="text" class="form-control" placeholder="The size of the track's file. Current value: <%= thyTrack.file_size %>" name="trackFile_size" value="<%= thyTrack.file_size %>" required>
+    </div>-->
+    <!--<div class="form-group">
+      <label>Duration</label>
+      <input type="text" class="form-control" placeholder="Duration of the track. Current value: <%= thyTrack.duration %>" name="trackDuration" value="<%= thyTrack.duration %>" required>
+    </div>-->
+    <div class="form-group">
+      <label>Track number</label>
+      <input type="number" min="1" class="form-control" placeholder="The number of track in the album. Current value: <%= thyTrack.number %>" name="trackNumber" value="<%= thyTrack.number %>" required>
+    </div>
+    <div class="form-group">
+      <label>Album</label>
+      <input input type="text" class="form-control" placeholder="The album that contains the song. Please, write the ID of the album here. Current value: <%= thyTrack.album._id %>" name="trackAlbum" value="<%= thyTrack.album._id %>" required>
+    </div>
+    <input type="submit" class="btn btn-info" value='Update info' />
+  </form>
+
+  <div class="text-center">
+    <a href="<%= back_url %>">Back to the track's page</a>
+  </div>
+  <!-- <script src="js/scripts.js"></script> -->
+</body>
+
+</html>

@@ -6,32 +6,48 @@
 
   <title><%= album.name %></title>
   <link rel="stylesheet" href="/stylesheets/centered-columns.css">
-  <link rel="stylesheet" href="/stylesheets/rightside-thumbnail.css">
 </head>
 
 <body>
   <div class="container-fluid">
-    <div class="thumbnail right-caption">
-      <img src="<%= img_path %>" width="300" height="200" alt="<%= album.name %>_logo">
-      <div class="caption">
-        <h3><%= album.name %></h3>
-        <h4><b>Band:</b> <a href="/bands/<%= album.band._id %>"><%= album.band.name %></a></h4>
-        <p><b>Release date</b>:
-          <% let albumDate = album.rls_date.split('-', 3); %>
-          <%= albumDate[2] %>.<%= albumDate[1] %>.<%= albumDate[0] %>
-        </p>
-        <p><b>Genre of an album</b>: <%= album.genre %></p>
-        <p><b>Amount of tracks</b>: <%= album.tracks %></p>
-        <p>
-          <b>The list of tracks</b>:<br>
-          <ul class="list-unstyled">
-            <% if (album.tracks_array) { %>
-              <% for (let i = 0; i < album.tracks_array.length; i++) { %>
-                <li><a href="/tracks/<%= album.tracks_array[i]._id %>"><%= album.tracks_array[i].name %></a></li>
-              <% } %>
-            <% } %>
-          </ul>
-        </p>
+    <div class="row">
+      <div class="col-sm-4 col-md-6">
+        <div class="thumbnail">
+          <img src="<%= img_path %>" width="300" height="200" alt="<%= album.name %>_logo">
+          <div class="caption">
+            <h3><%= album.name %></h3>
+            <h4><b>Band</b>: <a href="/bands/<%= album.band._id %>"><%= album.band.name %></a></h4>
+            <p><b>Release date</b>:
+              <% let albumDate = album.rls_date.split('-', 3); %>
+              <%= albumDate[2] %>.<%= albumDate[1] %>.<%= albumDate[0] %>
+            </p>
+            <p><b>Genre of an album</b>: <%= album.genre %></p>
+            <p><b>Amount of tracks</b>: <%= album.tracks %></p>
+          </div>
+        </div>
+      </div>
+      <div class="col-sm-4 col-md-6">
+        <div class="thumbnail">
+          <div class="caption">
+            <div class="text-center">
+              <h1>SONG LIST</h1>
+            </div>
+            <p>
+              <ul class="list-unstyled">
+                <% if (album.tracks_array.length === 0) { %>
+                  <div class="text-center text-muted">
+                    <li>The list is empty.</li>
+                  </div>
+                <% } %>
+                <% if (album.tracks_array) { %>
+                  <% for (let i = 0; i < album.tracks_array.length; i++) { %>
+                    <li><%= album.tracks_array[i].number %>. <a href="/tracks/<%= album.tracks_array[i]._id %>"><%= album.tracks_array[i].name %></a></li>
+                  <% } %>
+                <% } %>
+              </ul>
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   </div>

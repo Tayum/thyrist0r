@@ -93,7 +93,8 @@ router.route('/')
 									query = albumModel.find({
 										// search (case insensitive) partial match
 										name: { "$regex": search_value, "$options": "i" }
-									}).populate('band').limit(4).skip(4 * (pageNumber - 1)).lean();
+										// @TODO
+									}).populate('band').populate('tracks_array').limit(4).skip(4 * (pageNumber - 1)).lean();
 									query.exec(function(err, albums) {
 										if (err) {
 											err = new Error('Sorry, the file with contents were not found on server.');
@@ -145,11 +146,11 @@ router.route('/')
 				rls_date: req.body.albumRls_date,
 				genre: req.body.albumGenre,
 				tracks: req.body.albumTracks,
-        // tracks_array: [],
+        tracks_array: [],
         band: req.body.albumBand,
 				albumLogo: req.files.albumLogo.data
 			};
-			
+
 			albumFuncs.createAlbum(newAlbumObj, function() {
 				req.flash('success_msg', 'The album has been successfully created!');
 				res.redirect('/albums');
@@ -165,7 +166,7 @@ var deleteTheAlbum = function(req, res, next) {
 
 	query.exec(function(err, album) {
 		if (err) {
-			err = new Error('Sorry, the band cannot be removed from the database.');
+			err = new Error('Sorry, the album cannot be removed from the database.');
 			err.status = 500;
 			next(err);
 		}
@@ -249,6 +250,11 @@ router.route('/:album_id_param')
 				next(err);
 			}
 			else {
+				album.tracks_array.sort(function(a, b) {
+					if (a > b) return -1;
+					if (a < b) return 1;
+					return 0;
+				});
 				// if the album is about to be UPDATED, render the page with the UPDATE fields
 				if (req.query.q === "toUpdate") {
 					res.render('updateAlbum', {

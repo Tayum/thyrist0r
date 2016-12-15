@@ -1,0 +1,57 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+
+  <title><%= track.name %></title>
+  <link rel="stylesheet" href="/stylesheets/centered-columns.css">
+</head>
+
+<body>
+  <div class="container-fluid">
+    <div class="row row-centered">
+      <div class="col-sm-6 col-md-4 col-centered">
+        <div class="thumbnail">
+          <img src="<%= img_path %>" width="300" height="200" alt="<%= track.album.name %>_logo">
+          <div class="caption">
+            <h3><%= track.name %></h3>
+            <h4><b>Album</b>: <a href="/albums/<%= track.album._id %>"><%= track.album.name %></a></h4>
+            <h5><b>Band</b>: <a href="/bands/<%= track.album.band._id %>"><%= track.album.band.name %></a></h5>
+            <!--<p><b>Duration</b>: <%= track.duration %></p>
+            <p><b>File size</b>: <%= track.file_size %></p>-->
+            <p><a href="data:audio/mpeg;base64,<%= track.track_raw %>" download="<%= track.album.band.name %>_-_<%= track.name %>(<%= track.album.name %>).mp3">Download the track</a></p>
+            <p><audio controls>
+              <source src="data:audio/mpeg;base64,<%= track.track_raw %>" type="audio/mpeg">
+            </audio></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <% if (user.access_level === 10) { %>
+    <div class="col-sm-3 col-md-12">
+      <div class="row row-centered">
+        <form action="/tracks/<%= track_url %>?q=update" method="POST">
+          <input type="submit" class="btn btn-info" value='Update the info' />
+        </form>
+      </div>
+      <br>
+      <div class="row row-centered">
+        <form action="/tracks/<%= track_url %>?q=delete" method="POST">
+          <input type="submit" class="btn btn-danger" value='Delete this track' />
+        </form>
+      </div>
+      <br>
+    </div>
+  <% } %>
+
+  <div class="text-center">
+    <a href="<%= back_url %>">Back to the previous page</a>
+  </div>
+
+  <!-- <script src="js/scripts.js"></script> -->
+</body>
+
+</html>

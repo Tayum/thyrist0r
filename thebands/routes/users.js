@@ -185,6 +185,7 @@ router.route('/login')
     res.render('login');
   })
   /* Try to authentificate. */
+  // res.cookie('thyCookie', user.id, { maxAge: 2592000000 })
   .post(
     passport.authenticate('local', { successRedirect: '/', failureRedirect: '/users/login', failureFlash: true }),
     function(req, res, next) {
@@ -193,6 +194,7 @@ router.route('/login')
 
 router.route('/logout')
   /* Logout. */
+  // res.clearCookie('thyCookie'),
   .get(function(req, res, next) {
     if (req.originalUrl === '/logout/') {
       res.redirect('/logout');
