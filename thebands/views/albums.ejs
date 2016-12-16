@@ -14,6 +14,7 @@
   <div class="container-fluid">
     <div class="col-md-4 col-md-offset-4">
       <form action="/albums" method="GET">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
         <div class="input-group">
           <% if(search_value.length > 0) { %>
             <input type="text" name="albumName" value='<%= search_value %>' class="form-control" placeholder="Enter album's name..." required />
@@ -121,15 +122,6 @@
     <div class="container-fluid">
       <div class="text-center">
           <a href="/addalbum">Add new album</a>
-      </div>
-    </div>
-  <% } %>
-  <!-- if admin requests this page:
-  the button to add the song is also at the bottom -->
-  <% if(parseInt(user.access_level) === 10) { %>
-    <div class="container-fluid">
-      <div class="text-center">
-          <a href="/addtrack">Add new track</a>
       </div>
     </div>
   <% } %>

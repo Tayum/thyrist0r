@@ -18,6 +18,7 @@
       <% } %>
   <% } %>
   <form action="/tracks" enctype="multipart/form-data" method="POST">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
     <div class="form-group">
       <label>Name of the track</label>
       <input type="text" class="form-control" placeholder="Track's name" name="trackName" required>
@@ -36,7 +37,7 @@
     </div>
     <div class="form-group">
       <label>Album</label>
-      <input input type="text" class="form-control" placeholder="The album that contains the song. Please, write the ID of the album here" name="trackAlbum" required>
+      <input type="text" class="form-control" placeholder="The album that contains the song. Please, write the ID of the album here" name="trackAlbum" required>
     </div>
     <div class="form-group">
       <label>Track by itself</label>

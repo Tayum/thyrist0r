@@ -5,8 +5,15 @@ var fs = require('fs');
 // required for deleting the folder containing files (synchronously)
 var rimraf = require('rimraf');
 
+// GridFS
+const mongoose = require('mongoose');
+var conn = mongoose.connection;
+var Grid = require('gridfs-stream');
+
+// track MODEL MODULE
+var trackModel = require('../models/trackModel');
 // band MODEL MODULE
-var bandModel = require('../models/band');
+var bandModel = require('../models/bandModel');
 
 router.route('/bands')
   /* GET bands (by pagination). */
@@ -202,7 +209,7 @@ router.route('/bands')
           band.genre = req.body.bandGenre;
           band.albums = parseInt(req.body.bandAlbums);
           band.description = req.body.bandDescription;
-          
+
           band.save();
           res.send("The band has been successfully updated.");
         }
@@ -242,6 +249,35 @@ router.route('/bands')
       }
     });
   });
+
+  router.route('/trackRaw/:track_id_param')
+    /* GET the raw data of the track. */
+    .get(function(req, res, next) {
+      let trackPathId = req.params.track_id_param;
+      let query = trackModel.findById(trackPathId);
+      query.exec(function(err, track) {
+        if (err) {
+          res.send('Sorry, the file with contents were not found on server.');
+          res.end();
+        }
+        else {
+          console.log('Requested the raw data of track by API.');
+          var track_raw_data = [];
+          var gfs = Grid(conn.db);
+          var readstream = gfs.createReadStream({
+            _id: track.raw_data
+          });
+          readstream.on('data', function(chunk) {
+            track_raw_data.push(chunk);
+          });
+          readstream.on('end', function() {
+            track_raw_data = Buffer.concat(track_raw_data);
+            res.send(track_raw_data);
+            console.log('Sent all the data right now.');
+          });
+        }
+      });
+    });
 
 
 module.exports = router;

@@ -20,9 +20,11 @@
             <h5><b>Band</b>: <a href="/bands/<%= track.album.band._id %>"><%= track.album.band.name %></a></h5>
             <!--<p><b>Duration</b>: <%= track.duration %></p>
             <p><b>File size</b>: <%= track.file_size %></p>-->
-            <p><a href="data:audio/mpeg;base64,<%= track.track_raw %>" download="<%= track.album.band.name %>_-_<%= track.name %>(<%= track.album.name %>).mp3">Download the track</a></p>
+            <form id="form">
+              <input type="submit" class="btn btn-success" onclick="download('<%= track._id %>', '<%= track_dwnld_name %>')" value="Download" />
+            </form>
             <p><audio controls>
-              <source src="data:audio/mpeg;base64,<%= track.track_raw %>" type="audio/mpeg">
+              <source src="data:audio/mpeg;base64,<%= track_raw_data %>" type="audio/mpeg">
             </audio></p>
           </div>
         </div>
@@ -51,7 +53,7 @@
     <a href="<%= back_url %>">Back to the previous page</a>
   </div>
 
-  <!-- <script src="js/scripts.js"></script> -->
+  <script type="text/javascript" src="/javascripts/chunkDownload.js"></script>
 </body>
 
 </html>

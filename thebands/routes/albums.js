@@ -5,6 +5,10 @@ var fs = require('fs');
 // required for deleting the folder containing files (synchronously)
 var rimraf = require('rimraf');
 
+// csrfProtection
+var csrf = require('csurf');
+var csrfProtection = csrf({ cookie: true });
+
 // band MODEL MODULE
 var bandModel = require('../models/bandModel');
 // album MODEL MODULE
@@ -17,7 +21,7 @@ var ensureAuthFunc = new ensureAuth();
 
 router.route('/')
 	/* GET albums listing (pagination included). */
-	.get(ensureAuthFunc.ensureAuth, function(req, res, next) {
+	.get(csrfProtection, ensureAuthFunc.ensureAuth, function(req, res, next) {
 		if (req.originalUrl === '/albums/') {
 			res.redirect('/albums');
 		}
@@ -32,6 +36,7 @@ router.route('/')
 				// None albums are in database
 				else if (amount <= 0) {
 					res.render('albums', {
+				    csrfToken: req.csrfToken(),
 						curPage: 1,
 						maxPage: 1,
 						arr: [],
@@ -116,6 +121,7 @@ router.route('/')
 												});
 											}
 											res.render('albums', {
+											  csrfToken: req.csrfToken(),
 												curPage: pageNumber,
 												maxPage: parseInt((amount-1)/4 + 1),
 												arr: arr,
@@ -205,6 +211,7 @@ var updateTheAlbum = function(req, res, next) {
 			let errs = req.validationErrors();
 			if (errs) {
 				res.render('updateAlbum', {
+      		csrfToken: req.csrfToken(),
 					errors: errs,
 					album_url: albumPathId,
 					back_url: req.header('Referer') || '/albums',
@@ -233,7 +240,7 @@ router.route('/:album_id_param')
 	/* GET method: checking
 	WHETHER [User wants to gain a page with POST form to perform and UPDATE method]
 	OR [User simply wants to gain a page with the info of the album] */
-	.get(ensureAuthFunc.ensureAuth, function(req, res, next) {
+	.get(csrfProtection, ensureAuthFunc.ensureAuth, function(req, res, next) {
 	  let albumPathId = req.params.album_id_param;
 
 		let query = albumModel.findById(albumPathId).populate('band').populate('tracks_array');
@@ -251,13 +258,14 @@ router.route('/:album_id_param')
 			}
 			else {
 				album.tracks_array.sort(function(a, b) {
-					if (a > b) return -1;
-					if (a < b) return 1;
+					if (a.number > b.number) return 1;
+					if (a.number < b.number) return -1;
 					return 0;
 				});
 				// if the album is about to be UPDATED, render the page with the UPDATE fields
 				if (req.query.q === "toUpdate") {
 					res.render('updateAlbum', {
+						csrfToken: req.csrfToken(),
 						errors: null,
 						album_url: albumPathId,
 						back_url: req.header('Referer') || '/albums',

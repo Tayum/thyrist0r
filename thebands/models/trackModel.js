@@ -8,7 +8,7 @@ var trackSchema = new Schema({
   // file_size
   // duration
   number: Number,
-  track_raw: Schema.Types.Mixed,
+	raw_data: { type: Schema.Types.ObjectId, ref:"fs.files" },
   album: { type: Schema.Types.ObjectId, ref:"Album" }
 });
 

@@ -24,6 +24,7 @@
           <p>E-mail: <%= thyUser.email %></p>
           <% if(thyUser.username === user.username) { %>
             <form action="/users/profile/<%= user.username %>" enctype="multipart/form-data" method="POST">
+              <input type="hidden" name="_csrf" value="<%= csrfToken %>">
               <div class="form-group">
                 <label>Avatar</label>
                 <input type="file" accept="image/*" class="form-control" name="avatar" required>

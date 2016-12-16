@@ -17,6 +17,9 @@
             <% if (user) { %>
               <li><a href="/bands">Bands</a></li>
               <li><a href="/albums">Albums</a></li>
+              <% if(parseInt(user.access_level) === 10) { %>
+                <li><a href="/addtrack">New Track</a></li>
+              <% } %>
             <% } %>
           </ul>
           <ul class="nav nav-pills pull-right">

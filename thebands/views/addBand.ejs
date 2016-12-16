@@ -18,6 +18,7 @@
       <% } %>
   <% } %>
   <form action="/bands" enctype="multipart/form-data" method="POST">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
     <div class="form-group">
       <label>Name of the band</label>
       <input type="text" class="form-control" placeholder="Band's name" name="bandName" required>

@@ -15,6 +15,7 @@
       <% } %>
   <% } %>
   <form action="/bands/<%= band_url %>?q=isUpdated" method="POST">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
     <div class="form-group">
       <label>Name of the band</label>
       <input type="text" class="form-control" placeholder="Band's name. Current value: <%= thyBand.name %>" name="bandName" value='<%= thyBand.name %>' required>

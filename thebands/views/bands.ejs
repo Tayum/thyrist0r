@@ -14,6 +14,7 @@
   <div class="container-fluid">
     <div class="col-md-4 col-md-offset-4">
       <form action="/bands" method="GET">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
         <div class="input-group">
           <% if(search_value.length > 0) { %>
             <input type="text" name="bandName" value='<%= search_value %>' class="form-control" placeholder="Enter band's name..." required />

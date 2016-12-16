@@ -3,6 +3,10 @@ var router = express.Router();
 var path = require('path');
 var fs = require('fs');
 
+// csrfProtection
+var csrf = require('csurf');
+var csrfProtection = csrf({ cookie: true });
+
 // band MODEL MODULE
 var bandModel = require('../models/bandModel');
 var bandFuncs = require('../models/band');
@@ -13,7 +17,7 @@ var ensureAuthFunc = new ensureAuth();
 
 router.route('/')
 	/* GET bands listing (pagination included). */
-	.get(ensureAuthFunc.ensureAuth, function(req, res, next) {
+	.get(csrfProtection, ensureAuthFunc.ensureAuth, function(req, res, next) {
 		if (req.originalUrl === '/bands/') {
 			res.redirect('/bands');
 		}
@@ -28,6 +32,7 @@ router.route('/')
 				// None bands are in database
 				else if (amount <= 0) {
 					res.render('bands', {
+						csrfToken: req.csrfToken(),
 						curPage: 1,
 						maxPage: 1,
 						arr: [],
@@ -109,6 +114,7 @@ router.route('/')
 												});
 											}
 											res.render('bands', {
+										    csrfToken: req.csrfToken(),
 												curPage: pageNumber,
 												maxPage: parseInt((amount-1)/4 + 1),
 												arr: arr,
@@ -214,6 +220,7 @@ var updateTheBand = function(req, res, next) {
 			let errs = req.validationErrors();
 			if (errs) {
 				res.render('updateBand', {
+					csrfToken: req.csrfToken(),
 					errors: errs,
 					band_url: bandPathId,
 					back_url: req.header('Referer') || '/bands',
@@ -227,7 +234,7 @@ var updateTheBand = function(req, res, next) {
 				band.genre = req.body.bandGenre;
 				band.albums = parseInt(req.body.bandAlbums);
 				band.description = req.body.bandDescription;
-				
+
 				band.save();
 				req.flash('success_msg', 'The band has been successfully updated!');
 				res.redirect('/bands/' + bandPathId);
@@ -240,7 +247,7 @@ router.route('/:band_id_param')
 	/* GET method: checking
 	WHETHER [User wants to gain a page with POST form to perform and UPDATE method]
 	OR [User simply wants to gain a page with the info of the band] */
-	.get(ensureAuthFunc.ensureAuth, function(req, res, next) {
+	.get(csrfProtection, ensureAuthFunc.ensureAuth, function(req, res, next) {
 	  let bandPathId = req.params.band_id_param;
 
 		let query = bandModel.findById(bandPathId).populate('albums_array');
@@ -261,6 +268,7 @@ router.route('/:band_id_param')
 				console.log(band);
 				if (req.query.q === "toUpdate") {
 					res.render('updateBand', {
+					  csrfToken: req.csrfToken(),
 						errors: null,
 						band_url: bandPathId,
 						back_url: req.header('Referer') || '/bands',

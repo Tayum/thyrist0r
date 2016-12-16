@@ -5,6 +5,10 @@ var fs = require('fs');
 var passport = require('passport');
 var LocalStrategy = require('passport-local').Strategy;
 
+// csrfProtection
+var csrf = require('csurf');
+var csrfProtection = csrf({ cookie: true });
+
 // User MODEL MODULE
 var userModel = require('../models/user');
 
@@ -69,7 +73,7 @@ router.route('/')
 
 router.route('/register')
   /* GET register page. */
-  .get(function(req, res, next) {
+  .get(csrfProtection, function(req, res, next) {
     if (req.originalUrl === '/register/') {
       res.redirect('/register');
     }
@@ -78,17 +82,19 @@ router.route('/register')
       res.redirect('back');
     }
     res.render('register', {
+      csrfToken: req.csrfToken(),
       errors: null
     });
   })
   /* Registration. */
-  .post(function(req, res, next) {
+  .post(csrfProtection, function(req, res, next) {
     // Validate all the fields
     req.checkBody('email', 'Email is not valid').isEmail();
     req.checkBody('repassword', 'Passwords do not match').equals(req.body.password);
     let errs = req.validationErrors();
     if (errs) {
       res.render('register', {
+        csrfToken: req.csrfToken(),
         errors: errs
       });
     }
@@ -174,7 +180,7 @@ passport.deserializeUser(function(id, done) {
 
 router.route('/login')
     /* GET login page. */
-  .get(function(req, res, next) {
+  .get(csrfProtection, function(req, res, next) {
     // if the user is already authorised - redirect to home page
     if (req.user) {
       res.redirect('back');
@@ -182,7 +188,9 @@ router.route('/login')
     if (req.originalUrl === '/login/') {
       res.redirect('/login');
     }
-    res.render('login');
+    res.render('login', {
+      csrfToken: req.csrfToken(),
+    });
   })
   /* Try to authentificate. */
   // res.cookie('thyCookie', user.id, { maxAge: 2592000000 })
@@ -209,7 +217,7 @@ router.route('/logout')
 
 router.route('/profile/:user_username_param')
   /* GET profile page. */
-  .get(ensureAuthFunc.ensureAuth, function(req, res, next) {
+  .get(csrfProtection, ensureAuthFunc.ensureAuth, function(req, res, next) {
     let userPathUsername = req.params.user_username_param;
     userModel.getUserByUsername(userPathUsername, function(err, user) {
       if (err) {
@@ -235,6 +243,7 @@ router.route('/profile/:user_username_param')
             href: '/users/profile/' + user.username
           };
           res.render('userPage', {
+            csrfToken: req.csrfToken(),
             thyUser: thyUser,
             back_url: req.header('Referer') || userPageUrl
           });

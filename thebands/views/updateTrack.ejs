@@ -15,6 +15,7 @@
       <% } %>
   <% } %>
   <form action="/tracks/<%= track_url %>?q=isUpdated" method="POST">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
     <div class="form-group">
       <label>Name of the track</label>
       <input type="text" class="form-control" placeholder="Track's name. Current value: <%= thyTrack.name %>" name="trackName" value='<%= thyTrack.name %>' required>

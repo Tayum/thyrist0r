@@ -1,6 +1,15 @@
 var express = require('express');
 var router = express.Router();
 
+// csrfProtection
+var csrf = require('csurf');
+var csrfProtection = csrf({ cookie: true });
+
+// GridFS
+var mongoose = require('mongoose');
+var conn = mongoose.connection;
+var Grid = require('gridfs-stream');
+
 // track MODEL MODULE
 var trackModel = require('../models/trackModel');
 var trackFuncs = require('../models/track');
@@ -72,11 +81,10 @@ router.route('/')
 							// file_size: req.body.trackFile_size,
 			        // duration: req.body.trackDuration,
 							number: parseInt(req.body.trackNumber),
-			        track_raw: req.files.trackTrack_raw.data.toString('base64'),
 			        album: req.body.trackAlbum,
 						};
 
-						trackFuncs.createTrack(newTrackObj, function() {
+						trackFuncs.createTrack(newTrackObj, req.files.trackTrack_raw, function() {
 							req.flash('success_msg', 'The track has been successfully created!');
 							res.redirect('/albums/' + req.body.trackAlbum);
 						});
@@ -144,6 +152,7 @@ var updateTheTrack = function(req, res, next) {
 			let errs = req.validationErrors();
 			if (errs) {
 				res.render('updateTrack', {
+					csrfToken: req.csrfToken(),
 					errors: errs,
 					track_url: trackPathId,
 					back_url: req.header('Referer') || ('/tracks/' + track.album._id),
@@ -191,6 +200,7 @@ var updateTheTrack = function(req, res, next) {
 						}
 						if(isExceeds || isDuplicate) {
 							res.render('updateTrack', {
+								csrfToken: req.csrfToken(),
 								errors: errs,
 								track_url: trackPathId,
 								back_url: req.header('Referer') || ('/tracks/' + track.album._id),
@@ -203,7 +213,6 @@ var updateTheTrack = function(req, res, next) {
 								// file_size: req.body.trackFile_size,
 								// duration: req.body.trackDuration,
 								number: req.body.trackNumber,
-								// track_raw: req.body.trackTrack_raw
 								album: req.body.trackAlbum,
 							};
 
@@ -223,7 +232,7 @@ router.route('/:track_id_param')
 	/* GET method: checking
 	WHETHER [User wants to gain a page with POST form to perform and UPDATE method]
 	OR [User simply wants to gain a page with the info of the track] */
-	.get(ensureAuthFunc.ensureAuth, function(req, res, next) {
+	.get(csrfProtection, ensureAuthFunc.ensureAuth, function(req, res, next) {
 	  let trackPathId = req.params.track_id_param;
 		let query = trackModel.findById(trackPathId).populate({
 			path: 'album', populate: {
@@ -246,6 +255,7 @@ router.route('/:track_id_param')
 				// if the track is about to be UPDATED, render the page with the UPDATE fields
 				if (req.query.q === "toUpdate") {
 					res.render('updateTrack', {
+						csrfToken: req.csrfToken(),
 						errors: null,
 						track_url: trackPathId,
 						back_url: req.header('Referer') || ('/tracks/' + trackPathId),
@@ -253,13 +263,29 @@ router.route('/:track_id_param')
 					});
 				}
 				else {
-					// else simply render single certain track
-		      res.render('singleTrack', {
-		        img_path: '/images/albums/' + track.album._id + '/logo.jpg',
-						track_url: trackPathId,
-						back_url: req.header('Referer') || ('/albums/' + track.album._id),
-						track: track
-		      });
+					// else: simply render the page with the track to user
+					var raw_data = [];
+				  var gfs = Grid(conn.db);
+				  var readstream = gfs.createReadStream({
+				    _id: track.raw_data
+				  });
+				  readstream.on('data', function(chunk) {
+						raw_data.push(chunk);
+					});
+				  readstream.on('end', function() {
+						raw_data = Buffer.concat(raw_data);
+						raw_data = Buffer(raw_data).toString('base64');
+						let dwnld_name = track.album.band.name + '_-_' + track.name + '.mp3';
+						// else simply render single certain track
+						res.render('singleTrack', {
+							img_path: '/images/albums/' + track.album._id + '/logo.jpg',
+							track_url: trackPathId,
+							back_url: req.header('Referer') || ('/albums/' + track.album._id),
+							track: track,
+							track_raw_data: raw_data,
+							track_dwnld_name: dwnld_name
+						});
+				  });
 				}
 			}
 		});

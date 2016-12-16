@@ -1,8 +1,10 @@
 var express = require('express');
 var path = require('path');
+var fs = require('fs');
 var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
+var csrf = require('csurf');
 var bodyParser = require('body-parser');
 // reading text/blob data properly from HTML forms
 var busboyBodyParser = require('busboy-body-parser');
@@ -17,11 +19,19 @@ var LocalStrategy = require('passport-local').Strategy;
 // Layout
 var expressLayouts = require('express-ejs-layouts');
 
+var csrfProtection = csrf({ cookie: true });
+
 // CONNECT TO DATABASE
 const mongo = require('mongodb');
 const mongoose = require('mongoose');
 const url = 'mongodb://localhost:27017/thebands';
 mongoose.connect(url);
+
+// GridFS
+var conn = mongoose.connection;
+var Grid = require('gridfs-stream');
+// connect GridFS and mongo
+Grid.mongo = mongoose.mongo;
 
 var routes = require('./routes/index');
 var bands = require('./routes/bands');
@@ -97,6 +107,15 @@ app.use('/albums', albums);
 app.use('/tracks', tracks);
 app.use('/api', api);
 app.use('/users', users);
+
+// error handler
+app.use(function(err, req, res, next) {
+  if (err.code !== 'EBADCSRFTOKEN') return next(err);
+
+  // handle CSRF token errors here
+  res.status(403);
+  res.send('form tampered with');
+});
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

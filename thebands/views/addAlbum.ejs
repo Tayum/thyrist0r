@@ -18,6 +18,7 @@
       <% } %>
   <% } %>
   <form action="/albums" enctype="multipart/form-data" method="POST">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
     <div class="form-group">
       <label>Name of the album</label>
       <input type="text" class="form-control" placeholder="Album's name" name="albumName" required>

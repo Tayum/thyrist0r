@@ -15,6 +15,7 @@
       <% } %>
   <% } %>
   <form action="/albums/<%= album_url %>?q=isUpdated" method="POST">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
     <div class="form-group">
       <label>Name of the album</label>
       <input type="text" class="form-control" placeholder="Album's name. Current value: <%= thyAlbum.name %>" name="albumName" value='<%= thyAlbum.name %>' required>

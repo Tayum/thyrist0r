@@ -1,6 +1,12 @@
 // A MODULE TO EXPORT THE albumModel MODEL (USED WHEN WORKING WITH DATABASE)!
 const mongoose = require('mongoose');
 
+// GridFS
+var conn = mongoose.connection;
+var Grid = require('gridfs-stream');
+// connect GridFS and mongo
+Grid.mongo = mongoose.mongo;
+
 var Schema = mongoose.Schema;
 
 const trackModel = require('./trackModel');
@@ -25,22 +31,28 @@ module.exports.deleteTrack = function(trackRef) {
 				if (err) {
 					console.log("ERROR: cannot unlink the track from the corresponding album.");
 				}
-				track.remove();
+				var gfs = Grid(conn.db);
+				gfs.remove({ _id: track.raw_data }, function(err) {
+					if (err) {
+						console.log("ERROR: the track's raw data cannot be removed from the database.");
+					}
+					else {
+						track.remove();
+					}
+				});
 			});
 		}
 	});
 };
 
-module.exports.createTrack = function(infoObj, cb) {
+module.exports.createTrack = function(infoObj, raw_data, cb) {
 	let newTrack = new trackModel({
 		name: infoObj.name,
     // file_size: infoObj.file_size,
     // duration: infoObj.duration,
 		number: infoObj.number,
-    track_raw: infoObj.track_raw,
 		album: infoObj.album
 	});
-	//console.log("NEW CREATED TRACK:\n" + newTrack);
 	newTrack.save(function(err, track) {
 		if (err) {
 			console.log("ERROR: the track cannot be saved to the database.");
@@ -58,7 +70,24 @@ module.exports.createTrack = function(infoObj, cb) {
 				if (err) {
 					console.log("ERROR: cannot link the track to the cooresponding album.");
 				}
-				cb();
+
+				var gfs = Grid(conn.db);
+				let writeStream = gfs.createWriteStream({
+					filename: infoObj.name,
+					mode: 'w',
+					content_type: raw_data.mimetype
+				});
+
+				writeStream.on('close', function(file) {
+					// Link the raw data on the track's side
+					track.raw_data = file._id;
+					track.save();
+					cb();
+				});
+
+				writeStream.write(raw_data.data);
+
+				writeStream.end();
 			});
 		}
 	});
