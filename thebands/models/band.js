@@ -2,8 +2,6 @@
 const mongoose = require('mongoose');
 var path = require('path');
 var fs = require('fs');
-// required for deleting the folder containing files (synchronously)
-var rimraf = require('rimraf');
 
 var Schema = mongoose.Schema;
 
@@ -17,16 +15,5 @@ module.exports.deleteBand = function(band, cb) {
 			albumFuncs.deleteAlbum(band.albums_array[i]);
 		}
 	}
-	let dir = 'public/images/bands/' + band._id;
 	band.remove();
-	// Remove the directory (with a unique name - '_id') for the certain object
-	// (also removing all the files inside it)
-	rimraf(dir, function(err) {
-		if(err) {
-			console.log("ERROR WHILE DELETING THE FOLDER!");
-		}
-		else {
-			console.log("The folder has been successfully removed.");
-		}
-	});
 };

@@ -2,8 +2,6 @@ var express = require('express');
 var router = express.Router();
 var path = require('path');
 var fs = require('fs');
-// required for deleting the folder containing files (synchronously)
-var rimraf = require('rimraf');
 
 // csrfProtection
 var csrf = require('csurf');
@@ -107,24 +105,11 @@ router.route('/')
 											next(err);
 										}
 										else {
-											let arr = [];
-											let albumList = albums;
-											for (let i = 0; i < albumList.length; i++) {
-												let thyAlbum = albumList[i];
-												arr.push({
-													title: thyAlbum.name,
-													href: 'albums/' + thyAlbum._id,
-													alt: thyAlbum.name + '_logo',
-													img_path: 'images/albums/' + thyAlbum._id + '/logo.jpg',
-													bandHref: thyAlbum.band._id,
-													bandName: thyAlbum.band.name
-												});
-											}
 											res.render('albums', {
 											  csrfToken: req.csrfToken(),
 												curPage: pageNumber,
 												maxPage: parseInt((amount-1)/4 + 1),
-												arr: arr,
+												arr: albums,
 												search_value: search_value
 											});
 										}
@@ -147,6 +132,10 @@ router.route('/')
 			});
 		}
 		else {
+			let logo = "";
+			if (req.files && req.files.albumLogo && req.files.albumLogo.data) {
+				logo = req.files.albumLogo.data;
+			}
 			let newAlbumObj = {
 				name: req.body.albumName,
 				rls_date: req.body.albumRls_date,
@@ -154,7 +143,7 @@ router.route('/')
 				tracks: req.body.albumTracks,
         tracks_array: [],
         band: req.body.albumBand,
-				albumLogo: req.files.albumLogo.data
+				albumLogo: logo
 			};
 
 			albumFuncs.createAlbum(newAlbumObj, function() {
@@ -219,6 +208,10 @@ var updateTheAlbum = function(req, res, next) {
 				});
 			}
 			else {
+				let logo = "";
+				if (req.files && req.files.albumLogo && req.files.albumLogo.data) {
+					logo = req.files.albumLogo.data;
+				}
 				let updAlbumObj = {
 					name: req.body.albumName,
 					rls_date: req.body.albumRls_date,
@@ -307,6 +300,5 @@ router.route('/:album_id_param')
 			res.redirect(req.params.album_id_param);
 		}
 	});
-
 
 module.exports = router;

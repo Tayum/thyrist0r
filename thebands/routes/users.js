@@ -48,21 +48,10 @@ router.route('/')
               next(err);
             }
             else {
-              let arr = [];
-              for (let i = 0; i < users.length; i++) {
-                arr.push({
-                  access_level: users[i].access_level,
-                  name: users[i].name,
-                  email: users[i].email,
-                  username: users[i].username,
-                  img_path: '/images/users/' + users[i]._id + '/avatar.jpg',
-                  href: '/users/profile/' + users[i].username
-                });
-              }
               res.render('users', {
                 curPage: pageNumber,
                 maxPage: parseInt((amount-1)/20 + 1),
-                arr: arr
+                arr: users
               });
             }
           });
@@ -234,17 +223,9 @@ router.route('/profile/:user_username_param')
         // Any other page request for any authorised user (including admin)
         else {
           let userPageUrl = '/users/profile/' + req.user.username;
-          let thyUser = {
-            access_level: user.access_level,
-            name: user.name,
-            email: user.email,
-            username: user.username,
-            img_path: '/images/users/' + user._id + '/avatar.jpg',
-            href: '/users/profile/' + user.username
-          };
           res.render('userPage', {
             csrfToken: req.csrfToken(),
-            thyUser: thyUser,
+            thyUser: user,
             back_url: req.header('Referer') || userPageUrl
           });
         }
@@ -267,12 +248,12 @@ router.route('/profile/:user_username_param')
           res.redirect('back');
         }
         else {
-          // Create a directory (with a unique name - '_id') for the certain user
-          // and place the avatar there
-          let dir = 'public/images/users/' + user._id;
-          fs.mkdir(dir, function() {
-            fs.writeFile(dir + '/avatar.jpg', req.files.avatar.data);
-          });
+          let logo = "";
+          if (req.files && req.files.avatar && req.files.avatar.data) {
+            logo = req.files.avatar.data;
+          }
+          user.logo = logo;
+          user.save();
           req.flash('success_msg', 'The avatar has been successfully uploaded!');
           res.redirect('/users/profile/' + req.params.user_username_param);
         }

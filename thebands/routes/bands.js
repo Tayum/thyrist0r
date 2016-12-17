@@ -102,22 +102,11 @@ router.route('/')
 											next(err);
 										}
 										else {
-											let arr = [];
-											let bandList = bands;
-											for (let i = 0; i < bandList.length; i++) {
-												let thyBand = bandList[i];
-												arr.push({
-													title: thyBand.name,
-													href: 'bands/' + thyBand._id,
-													alt: thyBand.name + '_logo',
-													img_path: 'images/bands/' + thyBand._id + '/logo.jpg'
-												});
-											}
 											res.render('bands', {
 										    csrfToken: req.csrfToken(),
 												curPage: pageNumber,
 												maxPage: parseInt((amount-1)/4 + 1),
-												arr: arr,
+												arr: bands,
 												search_value: search_value
 											});
 										}
@@ -141,16 +130,25 @@ router.route('/')
 			});
 		}
 		else {
+			let bandLogo = "";
+			if (req.files && req.files.bandLogo && req.files.bandLogo.data) {
+				bandLogo = req.files.bandLogo.data;
+			}
+			let bandMembersLogo = "";
+			if (req.files && req.files.bandMembersLogo && req.files.bandMembersLogo.data) {
+				bandMembersLogo = req.files.bandMembersLogo.data;
+			}
 			let newBand = new bandModel({
 				name: req.body.bandName,
 				formed: req.body.bandFormed,
 				members: req.body.bandMembers,
 				genre: req.body.bandGenre,
 				albums: req.body.bandAlbums,
+				logo: bandLogo,
+				members_logo: bandMembersLogo,
 				albums_array: [],
 				description: req.body.bandDescription || ""
 			});
-			console.log("NEW CREATED BAND:\n" + newBand);
 			newBand.save(function(err, band) {
 				if (err) {
 					err = new Error('Sorry, the band cannot be saved to the database.');
@@ -158,13 +156,6 @@ router.route('/')
 					next(err);
 				}
 				else {
-					// Create a directory (with a unique name - '_id') for the certain object
-					// and place the passed images there
-					let dir = 'public/images/bands/' + band._id;
-			    fs.mkdir(dir, function() {
-						fs.writeFile(dir + '/logo.jpg', req.files.bandLogo.data);
-						fs.writeFile(dir + '/members.jpg', req.files.bandMembers.data);
-					});
 					req.flash('success_msg', 'The band has been successfully created!');
 					res.redirect('/bands');
 				}
@@ -201,8 +192,7 @@ var deleteTheBand = function(req, res, next) {
 var updateTheBand = function(req, res, next) {
 	let bandPathId = req.params.band_id_param;
 
-	let query = bandModel.findById(bandPathId).populate('albums');
-
+	let query = bandModel.findById(bandPathId).populate('albums_array');
 	query.exec(function(err, band) {
 		if (err) {
 			err = new Error('Sorry, the file with contents were not found on server.');
@@ -265,7 +255,6 @@ router.route('/:band_id_param')
 			}
 			else {
 				// if the band is about to be UPDATED, render the page with the UPDATE fields
-				console.log(band);
 				if (req.query.q === "toUpdate") {
 					res.render('updateBand', {
 					  csrfToken: req.csrfToken(),

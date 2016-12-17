@@ -2,8 +2,6 @@
 const mongoose = require('mongoose');
 var path = require('path');
 var fs = require('fs');
-// required for deleting the folder containing files (synchronously)
-var rimraf = require('rimraf');
 
 var Schema = mongoose.Schema;
 
@@ -37,18 +35,7 @@ module.exports.deleteAlbum = function(albumRef) {
 						deleteTrack(album.tracks_array[i]);
 					}
 				}
-				let dir = 'public/images/albums/' + album._id;
 				album.remove();
-				// Remove the directory (with a unique name - '_id') for the certain object
-				// (also removing all the files inside it)
-				rimraf(dir, function(err) {
-					if(err) {
-						console.log("ERROR WHILE DELETING THE FOLDER!");
-					}
-					else {
-						console.log("The folder has been successfully removed.");
-					}
-				});
 			});
 		}
 	});
@@ -60,6 +47,7 @@ module.exports.createAlbum = function(infoObj, cb) {
 		rls_date: infoObj.rls_date,
 		genre: infoObj.genre,
 		tracks: infoObj.tracks,
+		logo: infoObj.albumLogo,
 		tracks_array: infoObj.tracks_array,
 		band: infoObj.band
 	});
@@ -80,12 +68,6 @@ module.exports.createAlbum = function(infoObj, cb) {
 				if (err) {
 					console.log("ERROR: cannot link the album to the cooresponding band.");
 				}
-				// Create a directory (with a unique name - '_id') for the certain object
-				// and place the passed image there
-				let dir = 'public/images/albums/' + album._id;
-				fs.mkdir(dir, function() {
-					fs.writeFile(dir + '/logo.jpg', infoObj.albumLogo);
-				});
 				cb();
 			});
 		}
@@ -97,7 +79,6 @@ module.exports.updateAlbum = function(album, infoObj, cb) {
 	album.albumRls_date = infoObj.rls_date;
 	album.genre = infoObj.genre;
 	album.tracks = infoObj.tracks;
-
 	// If the band reference WAS NOT changed
 	if (album.band === infoObj.band) {
 		album.save();

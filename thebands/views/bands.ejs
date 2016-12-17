@@ -14,7 +14,6 @@
     <div class="col-md-4 col-md-offset-4">
       <form id="search">
         <div class="input-group">
-          <input type="hidden" id="pageId" name="pageId" value="<%= curPage %>">
           <% if(search_value.length > 0) { %>
             <input type="text" id="bandNameId" name="bandName" value='<%= search_value %>' class="form-control" placeholder="Enter band's name..." required />
           <% } %>
@@ -36,10 +35,10 @@
         <% for (let i = 0; i < arr.length; i++) { %>
         <div class="col-sm-6 col-md-3">
           <div class="thumbnail">
-            <img src="<%= arr[i].img_path %>" width="256" height="256" alt="<%= arr[i].alt %>">
+            <img src="data:image/jpg;base64,<%= arr[i].logo.toString('base64') %>" width="256" height="256" alt="<%= arr[i].name %>_logo">
             <div class="caption">
-              <h3><%= arr[i].title %></h3>
-              <p><a href="<%= arr[i].href %>" class="btn btn-primary" role="button">More...</a></p>
+              <h3><%= arr[i].name %></h3>
+              <p><a href="bands/<%= arr[i]._id %>" class="btn btn-primary" role="button">More...</a></p>
             </div>
           </div>
         </div>
@@ -119,7 +118,7 @@
           {{#bands}}
           <div class="col-sm-6 col-md-3">
             <div class="thumbnail">
-              <img src="images/bands/{{_id}}/logo.jpg" width="256" height="256" alt="{{name}}_logo">
+              <img src="data:image/jpg;base64,{{logo}}" width="256" height="256" alt="{{name}}_logo">
               <div class="caption">
                 <h3>{{name}}</h3>
                 <p><a href="bands/{{_id}}" class="btn btn-primary" role="button">More...</a></p>
@@ -166,7 +165,7 @@
     </div>
   </script>
 
-  <script src="/javascripts/searchAjax.js"></script>
+  <script src="/javascripts/ajax_searchBands.js"></script>
   <script src="/javascripts/bootstrap.js"></script>
 </body>
 

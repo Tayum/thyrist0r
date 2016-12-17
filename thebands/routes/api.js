@@ -12,6 +12,8 @@ var Grid = require('gridfs-stream');
 
 // track MODEL MODULE
 var trackModel = require('../models/trackModel');
+// album MODEL MODULE
+var albumModel = require('../models/albumModel');
 // band MODEL MODULE
 var bandModel = require('../models/bandModel');
 
@@ -334,7 +336,71 @@ router.route('/bands')
                     bandsObj: bandsObj,
                     exceedsObj: exceedsObj
                   };
-                  console.log("SENT THE NEXT INFO: " + fullObj.bandsObj.bands);
+                  res.send(fullObj);
+                  res.end();
+                }
+              });
+            }
+          }
+        });
+      }
+    });
+
+  router.route('/albumsAjax')
+    .get(function(req, res, next) {
+      if (req.originalUrl === '/albumsAjax/') {
+        res.redirect('/albumsAjax');
+      }
+      else {
+        // First check if there are at least some bands that meet criteria
+        let search_value = req.query.albumName;
+        query = albumModel.count({
+          name: { "$regex": search_value, "$options": "i" }
+        });
+        query.exec(function(err, amount) {
+          if(err) {
+            res.send('Sorry, the file with contents were not found on server.');
+            res.end();
+          }
+          else {
+            let fullObj = null;
+            // exceedsObj object, that is formed to maintain page in future
+            let isExceeds = (amount > 4);
+            let exceedsObj = {
+              exceeds: isExceeds
+            };
+            //
+
+            let albumsObj = null;
+            // There are no such albums: send object with empty array
+            if (amount === 0) {
+              albumsObj = {
+                albums: []
+              };
+              fullObj = {
+                albumsObj: albumsObj,
+                exceedsObj: exceedsObj
+              };
+              res.send(fullObj);
+            }
+            // If there are some albums: send the object with this albums
+            else {
+              query = albumModel.find({
+                name: { "$regex": search_value, "$options": "i" }
+              }).populate('band').limit(4).lean();
+              query.exec(function(err, albums) {
+                if (err) {
+                  res.send('Sorry, the file with contents were not found on server.');
+                  res.end();
+                }
+                else {
+                  albumsObj = {
+                    albums: albums
+                  };
+                  fullObj = {
+                    albumsObj: albumsObj,
+                    exceedsObj: exceedsObj
+                  };
                   res.send(fullObj);
                   res.end();
                 }

@@ -13,14 +13,13 @@
 <body>
   <div class="container-fluid">
     <div class="col-md-4 col-md-offset-4">
-      <form action="/albums" method="GET">
-        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <form id="search">
         <div class="input-group">
           <% if(search_value.length > 0) { %>
-            <input type="text" name="albumName" value='<%= search_value %>' class="form-control" placeholder="Enter album's name..." required />
+            <input type="text" id="albumNameId" name="albumName" value='<%= search_value %>' class="form-control" placeholder="Enter album's name..." required />
           <% } %>
           <% if(search_value.length === 0) { %>
-            <input type="text" name="albumName" class="form-control" placeholder="Enter album's name..." required />
+            <input type="text" id="albumNameId" name="albumName" class="form-control" placeholder="Enter album's name..." required />
           <% } %>
           <span class="input-group-btn">
             <input type="submit" class="btn btn-info" value='Search'>
@@ -29,72 +28,74 @@
       </form>
     </div>
   </div>
-  <br>
 
-  <div class="container-fluid">
-    <div class="row">
-      <% for (let i = 0; i < arr.length; i++) { %>
-      <div class="col-sm-6 col-md-3">
-        <div class="thumbnail">
-          <img src="<%= arr[i].img_path %>" width="256" height="256" alt="<%= arr[i].alt %>">
-          <div class="caption">
-            <h3><%= arr[i].title %></h3>
-            <h4><b>Band:</b> <a href="/bands/<%= arr[i].bandHref %>"><%= arr[i].bandName %></a></h4>
-            <p><a href="<%= arr[i].href %>" class="btn btn-primary" role="button">More...</a></p>
+  <br>
+  <div id="search-result">
+    <div class="container-fluid">
+      <div class="row">
+        <% for (let i = 0; i < arr.length; i++) { %>
+        <div class="col-sm-6 col-md-3">
+          <div class="thumbnail">
+            <img src="data:image/jpg;base64,<%= arr[i].logo.toString('base64') %>" width="256" height="256" alt="<%= arr[i].name %>_logo">
+            <div class="caption">
+              <h3><%= arr[i].name %></h3>
+              <h4><b>Band:</b> <a href="/bands/<%= arr[i].band._id %>"><%= arr[i].band.name %></a></h4>
+              <p><a href="albums/<%= arr[i]._id %>" class="btn btn-primary" role="button">More...</a></p>
+            </div>
           </div>
         </div>
+        <% } %>
       </div>
-      <% } %>
     </div>
-  </div>
 
-  <div class="container-fluid">
-    <div class="row col-md-offset-4">
-      <nav aria-label="Page navigation">
-        <ul class="nav nav-pills col-md-offset-1">
-          <% if (curPage <= 1) { %>
-            <li class="disabled">
-              <a>&laquo;  Previous</a>
+    <div class="container-fluid">
+      <div class="row col-md-offset-4">
+        <nav aria-label="Page navigation">
+          <ul class="nav nav-pills col-md-offset-1">
+            <% if (curPage <= 1) { %>
+              <li class="disabled">
+                <a>&laquo;  Previous</a>
+              </li>
+            <% } %>
+
+            <% if (curPage > 1) { %>
+              <% if (search_value.length > 0) { %>
+                <li>
+                  <a href="/albums?page=<%= (curPage - 1) %>&amp;albumName=<%= search_value %>">&laquo;  Previous</a>
+                </li>
+              <% } %>
+              <% if (search_value.length <= 0) { %>
+                <li>
+                  <a href="/albums?page=<%= (curPage - 1) %>">&laquo;  Previous</a>
+                </li>
+              <% } %>
+            <% } %>
+
+            <li>
+              <a><%= curPage %></a>
             </li>
-          <% } %>
 
-          <% if (curPage > 1) { %>
-            <% if (search_value.length > 0) { %>
-              <li>
-                <a href="/albums?page=<%= (curPage - 1) %>&amp;albumName=<%= search_value %>">&laquo;  Previous</a>
+            <% if (curPage < maxPage) { %>
+              <% if (search_value.length > 0) { %>
+                <li>
+                  <a href="/albums?page=<%= (curPage - -1) %>&amp;albumName=<%= search_value %>">Next  &raquo;</a>
+                </li>
+              <% } %>
+              <% if (search_value.length <= 0) { %>
+                <li>
+                  <a href="/albums?page=<%= (curPage - -1) %>">Next  &raquo;</a>
+                </li>
+              <% } %>
+            <% } %>
+
+            <% if (curPage >= maxPage) { %>
+              <li class="disabled">
+                <a>Next  &raquo;</a>
               </li>
             <% } %>
-            <% if (search_value.length <= 0) { %>
-              <li>
-                <a href="/albums?page=<%= (curPage - 1) %>">&laquo;  Previous</a>
-              </li>
-            <% } %>
-          <% } %>
-
-          <li>
-            <a><%= curPage %></a>
-          </li>
-
-          <% if (curPage < maxPage) { %>
-            <% if (search_value.length > 0) { %>
-              <li>
-                <a href="/albums?page=<%= (curPage - -1) %>&amp;albumName=<%= search_value %>">Next  &raquo;</a>
-              </li>
-            <% } %>
-            <% if (search_value.length <= 0) { %>
-              <li>
-                <a href="/albums?page=<%= (curPage - -1) %>">Next  &raquo;</a>
-              </li>
-            <% } %>
-          <% } %>
-
-          <% if (curPage >= maxPage) { %>
-            <li class="disabled">
-              <a>Next  &raquo;</a>
-            </li>
-          <% } %>
-        </ul>
-      </nav>
+          </ul>
+        </nav>
+      </div>
     </div>
   </div>
 
@@ -109,7 +110,66 @@
     </div>
   <% } %>
 
-    <!-- <script src="js/scripts.js"></script> -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mustache.js/2.2.1/mustache.min.js"></script>
+
+  <script id="search-script" type="x-tmpl-mustache">
+    <div id="search-result">
+      <div class="container-fluid">
+        <div class="row">
+          {{#albums}}
+          <div class="col-sm-6 col-md-3">
+            <div class="thumbnail">
+              <img src="data:image/jpg;base64,{{logo}}" width="256" height="256" alt="{{name}}_logo">
+              <div class="caption">
+                <h3>{{name}}</h3>
+                <h4><b>Band:</b> <a href="/bands/{{band._id}}">{{band.name}}</a></h4>
+                <p><a href="albums/{{_id}}" class="btn btn-primary" role="button">More...</a></p>
+              </div>
+            </div>
+          </div>
+          {{/albums}}
+        </div>
+      </div>
+      {{^empty}}
+        <div class="container-fluid">
+          <div class="row col-md-offset-4">
+            <nav aria-label="Page navigation">
+              <ul class="nav nav-pills col-md-offset-1">
+                <li class="disabled">
+                  <a>&laquo;  Previous</a>
+                </li>
+
+                <li>
+                  <a>1</a>
+                </li>
+
+                {{#exceeds}}
+                  <li>
+                    <a href="/albums?page=2&amp;albumName={{search_value}}">Next  &raquo;</a>
+                  </li>
+                {{/exceeds}}
+
+                {{^exceeds}}
+                  <li class="disabled">
+                    <a>Next  &raquo;</a>
+                  </li>
+                {{/exceeds}}
+              </ul>
+            </nav>
+          </div>
+        </div>
+      {{/empty}}
+      {{#empty}}
+        <div class="text-center text-muted">
+          Nothing were found by the query. :(
+        </div>
+      {{/empty}}
+    </div>
+  </script>
+
+  <script src="/javascripts/ajax_searchAlbums.js"></script>
+  <script src="/javascripts/bootstrap.js"></script>
 </body>
 
 </html>

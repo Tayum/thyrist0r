@@ -13,7 +13,7 @@
     <div class="row row-centered">
       <div class="col-sm-6 col-md-4 col-centered">
         <div class="thumbnail">
-          <img src="<%= img_path %>" width="300" height="200" alt="<%= track.album.name %>_logo">
+          <img src="data:image/jpg;base64,<%= track.album.logo.toString('base64') %>" width="300" height="200" alt="<%= track.album.name %>_logo">
           <div class="caption">
             <h3><%= track.name %></h3>
             <h4><b>Album</b>: <a href="/albums/<%= track.album._id %>"><%= track.album.name %></a></h4>

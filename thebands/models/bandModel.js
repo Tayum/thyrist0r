@@ -10,6 +10,8 @@ var bandSchema = new Schema({
 	genre: String,
 	albums: Number,
 	description: String,
+	logo: Buffer,
+	members_logo: Buffer,
 	albums_array: [ { type: Schema.Types.ObjectId, ref:"Album" } ]
 });
 
