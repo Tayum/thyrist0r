@@ -4,7 +4,6 @@
 
 <head>
     <meta charset="utf-8">
-
     <title>List of Bands</title>
 
     <link rel="stylesheet" href="/stylesheets/centered-columns.css">
@@ -13,14 +12,14 @@
 <body>
   <div class="container-fluid">
     <div class="col-md-4 col-md-offset-4">
-      <form action="/bands" method="GET">
-        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <form id="search">
         <div class="input-group">
+          <input type="hidden" id="pageId" name="pageId" value="<%= curPage %>">
           <% if(search_value.length > 0) { %>
-            <input type="text" name="bandName" value='<%= search_value %>' class="form-control" placeholder="Enter band's name..." required />
+            <input type="text" id="bandNameId" name="bandName" value='<%= search_value %>' class="form-control" placeholder="Enter band's name..." required />
           <% } %>
           <% if(search_value.length === 0) { %>
-            <input type="text" name="bandName" class="form-control" placeholder="Enter band's name..." required />
+            <input type="text" id="bandNameId" name="bandName" class="form-control" placeholder="Enter band's name..." required />
           <% } %>
           <span class="input-group-btn">
             <input type="submit" class="btn btn-info" value='Search'>
@@ -29,92 +28,77 @@
       </form>
     </div>
   </div>
-  <br>
 
-  <div class="container-fluid">
-    <div class="row">
-      <% for (let i = 0; i < arr.length; i++) { %>
-      <div class="col-sm-6 col-md-3">
-        <div class="thumbnail">
-          <img src="<%= arr[i].img_path %>" width="256" height="256" alt="<%= arr[i].alt %>">
-          <div class="caption">
-            <h3><%= arr[i].title %></h3>
-            <p><a href="<%= arr[i].href %>" class="btn btn-primary" role="button">More...</a></p>
+  <br>
+  <div id="search-result">
+    <div class="container-fluid">
+      <div class="row">
+        <% for (let i = 0; i < arr.length; i++) { %>
+        <div class="col-sm-6 col-md-3">
+          <div class="thumbnail">
+            <img src="<%= arr[i].img_path %>" width="256" height="256" alt="<%= arr[i].alt %>">
+            <div class="caption">
+              <h3><%= arr[i].title %></h3>
+              <p><a href="<%= arr[i].href %>" class="btn btn-primary" role="button">More...</a></p>
+            </div>
           </div>
         </div>
+        <% } %>
       </div>
-      <% } %>
+    </div>
+
+    <div class="container-fluid">
+      <div class="row col-md-offset-4">
+        <nav aria-label="Page navigation">
+          <ul class="nav nav-pills col-md-offset-1">
+            <% if (curPage <= 1) { %>
+              <li class="disabled">
+                <a>&laquo;  Previous</a>
+              </li>
+            <% } %>
+
+            <% if (curPage > 1) { %>
+              <% if (search_value.length > 0) { %>
+                <li>
+                  <a href="/bands?page=<%= (curPage - 1) %>&amp;bandName=<%= search_value %>">&laquo;  Previous</a>
+                </li>
+              <% } %>
+              <% if (search_value.length <= 0) { %>
+                <li>
+                  <a href="/bands?page=<%= (curPage - 1) %>">&laquo;  Previous</a>
+                </li>
+              <% } %>
+            <% } %>
+
+            <li>
+              <a><%= curPage %></a>
+            </li>
+
+            <% if (curPage < maxPage) { %>
+              <% if (search_value.length > 0) { %>
+                <li>
+                  <a href="/bands?page=<%= (curPage - -1) %>&amp;bandName=<%= search_value %>">Next  &raquo;</a>
+                </li>
+              <% } %>
+              <% if (search_value.length <= 0) { %>
+                <li>
+                  <a href="/bands?page=<%= (curPage - -1) %>">Next  &raquo;</a>
+                </li>
+              <% } %>
+            <% } %>
+
+            <% if (curPage >= maxPage) { %>
+              <li class="disabled">
+                <a>Next  &raquo;</a>
+              </li>
+            <% } %>
+          </ul>
+        </nav>
+      </div>
     </div>
   </div>
 
-  <div class="container-fluid">
-    <div class="col-md-4 col-md-offset-5">
-      <nav aria-label="Page navigation">
-      <ul class="pagination">
-        <% if (curPage <= 1) { %>
-          <li class="disabled">
-            <span>
-              <span aria-hidden="true">&laquo;</span>
-            </span>
-          </li>
-        <% } %>
-        <% if (curPage > 1) { %>
-          <% if (search_value.length > 0) { %>
-            <li>
-              <a href="/bands?page=<%= (curPage - 1) %>&amp;bandName=<%= search_value %>" aria-label="Previous">
-                <span aria-hidden="true">&laquo;</span>
-              </a>
-            </li>
-          <% } %>
-          <% if (search_value.length <= 0) { %>
-            <li>
-              <a href="/bands?page=<%= (curPage - 1) %>" aria-label="Previous">
-                <span aria-hidden="true">&laquo;</span>
-              </a>
-            </li>
-          <% } %>
-        <% } %>
-        <% if (curPage > 1) { %>
-          <% if (search_value.length > 0) { %>
-            <li><a href="/bands?page=<%= (curPage - 1) %>&amp;bandName=<%= search_value %>"><%= (curPage - 1) %></a></li>
-          <% } %>
-          <% if (search_value.length <= 0) { %>
-            <li><a href="/bands?page=<%= (curPage - 1) %>"><%= (curPage - 1) %></a></li>
-          <% } %>
-        <% } %>
-        <li class="active">
-          <span><%= curPage %> <span class="sr-only">(current)</span></span>
-        </li>
-        <% if (curPage < maxPage) { %>
-          <% if (search_value.length > 0) { %>
-            <li><a href="/bands?page=<%= (curPage - -1) %>&amp;bandName=<%= search_value %>"><%= (curPage - -1) %></a></li>
-            <li>
-              <a href="/bands?page=<%= (curPage - -1) %>&amp;bandName=<%= search_value %>" aria-label="Next">
-                <span aria-hidden="true">&raquo;</span>
-              </a>
-            </li>
-          <% } %>
-          <% if (search_value.length <= 0) { %>
-            <li><a href="/bands?page=<%= (curPage - -1) %>"><%= (curPage - -1) %></a></li>
-            <li>
-              <a href="/bands?page=<%= (curPage - -1) %>" aria-label="Next">
-                <span aria-hidden="true">&raquo;</span>
-              </a>
-            </li>
-          <% } %>
-        <% } %>
-        <% if (curPage >= maxPage) { %>
-          <li class="disabled">
-            <span>
-              <span aria-hidden="true">&raquo;</span>
-            </span>
-          </li>
-        <% } %>
-      </ul>
-    </nav>
-    </div>
-  </div>
-
+  <br>
   <!-- if admin requests this page:
   the button to add the band is also at the bottom -->
   <% if(parseInt(user.access_level) === 10) { %>
@@ -125,7 +109,65 @@
     </div>
   <% } %>
 
-    <!-- <script src="js/scripts.js"></script> -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mustache.js/2.2.1/mustache.min.js"></script>
+
+  <script id="search-script" type="x-tmpl-mustache">
+    <div id="search-result">
+      <div class="container-fluid">
+        <div class="row">
+          {{#bands}}
+          <div class="col-sm-6 col-md-3">
+            <div class="thumbnail">
+              <img src="images/bands/{{_id}}/logo.jpg" width="256" height="256" alt="{{name}}_logo">
+              <div class="caption">
+                <h3>{{name}}</h3>
+                <p><a href="bands/{{_id}}" class="btn btn-primary" role="button">More...</a></p>
+              </div>
+            </div>
+          </div>
+          {{/bands}}
+        </div>
+      </div>
+      {{^empty}}
+        <div class="container-fluid">
+          <div class="row col-md-offset-4">
+            <nav aria-label="Page navigation">
+              <ul class="nav nav-pills col-md-offset-1">
+                <li class="disabled">
+                  <a>&laquo;  Previous</a>
+                </li>
+
+                <li>
+                  <a>1</a>
+                </li>
+
+                {{#exceeds}}
+                  <li>
+                    <a href="/bands?page=2&amp;bandName={{search_value}}">Next  &raquo;</a>
+                  </li>
+                {{/exceeds}}
+
+                {{^exceeds}}
+                  <li class="disabled">
+                    <a>Next  &raquo;</a>
+                  </li>
+                {{/exceeds}}
+              </ul>
+            </nav>
+          </div>
+        </div>
+      {{/empty}}
+      {{#empty}}
+        <div class="text-center text-muted">
+          Nothing were found by the query. :(
+        </div>
+      {{/empty}}
+    </div>
+  </script>
+
+  <script src="/javascripts/searchAjax.js"></script>
+  <script src="/javascripts/bootstrap.js"></script>
 </body>
 
 </html>

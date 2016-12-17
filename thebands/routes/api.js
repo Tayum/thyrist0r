@@ -279,5 +279,71 @@ router.route('/bands')
       });
     });
 
+  router.route('/bandsAjax')
+    .get(function(req, res, next) {
+      if (req.originalUrl === '/bandsAjax/') {
+        res.redirect('/bandsAjax');
+      }
+      else {
+        // First check if there are at least some bands that meet criteria
+        let search_value = req.query.bandName;
+        query = bandModel.count({
+          name: { "$regex": search_value, "$options": "i" }
+        });
+        query.exec(function(err, amount) {
+          if(err) {
+            res.send('Sorry, the file with contents were not found on server.');
+            res.end();
+          }
+          else {
+            let fullObj = null;
+            // exceedsObj object, that is formed to maintain page in future
+            let isExceeds = (amount > 4);
+            let exceedsObj = {
+              exceeds: isExceeds
+            };
+            //
+
+            let bandsObj = null;
+            // There are no such bands: send object with empty array
+            if (amount === 0) {
+              bandsObj = {
+                bands: []
+              };
+              fullObj = {
+                bandsObj: bandsObj,
+                exceedsObj: exceedsObj
+              };
+              res.send(fullObj);
+            }
+            // If there are some bands: send the object with this bands
+            else {
+              query = bandModel.find({
+                name: { "$regex": search_value, "$options": "i" }
+              }).limit(4).lean();
+              query.exec(function(err, bands) {
+                if (err) {
+                  res.send('Sorry, the file with contents were not found on server.');
+                  res.end();
+                }
+                else {
+                  bandsObj = {
+                    bands: bands
+                  };
+                  fullObj = {
+                    bandsObj: bandsObj,
+                    exceedsObj: exceedsObj
+                  };
+                  console.log("SENT THE NEXT INFO: " + fullObj.bandsObj.bands);
+                  res.send(fullObj);
+                  res.end();
+                }
+              });
+            }
+          }
+        });
+      }
+    });
+
 
 module.exports = router;
